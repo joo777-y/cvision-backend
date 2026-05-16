@@ -8,10 +8,12 @@ const startServer = async () => {
   try {
     await connectDatabase();
     initGridFS();
-    await loadSkillsDictionary();
+    loadSkillsDictionary().catch(console.error);
 
-    app.listen(config.port, () => {
-      console.log(`Server running on http://localhost:${config.port}`);
+    const PORT = process.env.PORT || config.port;
+
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
     });
   } catch (error) {
     console.error('Failed to start server:', error);

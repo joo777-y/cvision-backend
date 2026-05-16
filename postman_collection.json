@@ -1,0 +1,449 @@
+{
+  "info": {
+    "_postman_id": "cv-filtering-api",
+    "name": "AI CV Filtering API",
+    "description": "API collection for AI CV Filtering System - Figma-aligned. Server: Health. Auth, Jobs, CVs, Skills, Dashboard. accessToken, jobId, cvId, skillId auto-saved from Login, Create Job, Upload CV, Create Skill.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5000/api", "type": "string" },
+    { "key": "baseServer", "value": "http://localhost:5000", "type": "string" },
+    { "key": "accessToken", "value": "", "type": "string" },
+    { "key": "jobId", "value": "", "type": "string" },
+    { "key": "cvId", "value": "", "type": "string" },
+    { "key": "skillId", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Server",
+      "item": [
+        {
+          "name": "Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseServer}}/health", "host": ["{{baseServer}}"], "path": ["health"] },
+            "description": "Server health check. No auth. Response: { status: 'UP', message: 'Server is healthy' }"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', function() { pm.response.to.have.status(200); });",
+                  "var json = pm.response.json();",
+                  "pm.test('Server is UP', function() { pm.expect(json.status).to.eql('UP'); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"John Doe\",\n  \"emailAddress\": \"hr@example.com\",\n  \"role\": \"hr\",\n  \"companyName\": \"Acme Inc.\",\n  \"password\": \"password123\",\n  \"confirmPassword\": \"password123\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] },
+            "description": "HR only. role must be \"hr\"; companyName required. Returns user + accessToken."
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"hr@example.com\",\n  \"password\": \"Hr@123\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+            "description": "Accepts email or emailAddress. Response: user (id, fullName, email, companyName, role), accessToken",
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "exec": [
+                    "var json = pm.response.json();",
+                    "pm.test('Success response', function() { pm.expect(json.success).to.be.true; });",
+                    "pm.test('Has accessToken', function() { pm.expect(json.data && json.data.accessToken).to.be.ok; });",
+                    "if (pm.response.code === 200 && json.success && json.data && json.data.accessToken) {",
+                    "  pm.collectionVariables.set(\"accessToken\", json.data.accessToken);",
+                    "}"
+                  ],
+                  "type": "text/javascript"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/auth/profile", "host": ["{{baseUrl}}"], "path": ["auth", "profile"] }
+          }
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"password123\",\n  \"newPassword\": \"newPassword456\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/change-password", "host": ["{{baseUrl}}"], "path": ["auth", "change-password"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Jobs",
+      "item": [
+        {
+          "name": "Create Job",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jobTitle\": \"Senior Full Stack Developer\",\n  \"jobDescription\": \"We are looking for an experienced developer\",\n  \"location\": \"Remote, Cairo\",\n  \"jobType\": \"full-time\",\n  \"department\": \"Engineering\",\n  \"salaryRange\": { \"min\": 15000, \"max\": 20000 },\n  \"experience\": 5,\n  \"requirements\": \"5+ years experience\",\n  \"responsibilities\": \"Lead development\",\n  \"benefits\": \"Health insurance, remote work\",\n  \"status\": \"draft\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/jobs", "host": ["{{baseUrl}}"], "path": ["jobs"] },
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "exec": [
+                    "var json = pm.response.json();",
+                    "if (pm.response.code === 201 && json.success && json.data && json.data.job && json.data.job.id) {",
+                    "  pm.collectionVariables.set(\"jobId\", String(json.data.job.id));",
+                    "}"
+                  ],
+                  "type": "text/javascript"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "Get All Jobs",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/jobs?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["jobs"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "search", "value": "frontend", "disabled": true },
+                { "key": "location", "value": "Cairo", "disabled": true },
+                { "key": "jobType", "value": "full-time", "disabled": true },
+                { "key": "department", "value": "Engineering", "disabled": true },
+                { "key": "minSalary", "value": "10000", "disabled": true },
+                { "key": "maxSalary", "value": "50000", "disabled": true },
+                { "key": "status", "value": "active", "disabled": true }
+              ]
+            },
+            "description": "Public. No auth required for candidate job search. Auth header optional."
+          }
+        },
+        {
+          "name": "Get Job By ID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/jobs/{{jobId}}", "host": ["{{baseUrl}}"], "path": ["jobs", "{{jobId}}"] },
+            "description": "Public. No auth required. Auth header optional."
+          }
+        },
+        {
+          "name": "Update Job",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jobTitle\": \"Updated Job Title\",\n  \"jobDescription\": \"Updated description\",\n  \"benefits\": \"Health insurance\",\n  \"experience\": 4,\n  \"status\": \"active\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/jobs/{{jobId}}", "host": ["{{baseUrl}}"], "path": ["jobs", "{{jobId}}"] }
+          }
+        },
+        {
+          "name": "Delete Job",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/jobs/{{jobId}}", "host": ["{{baseUrl}}"], "path": ["jobs", "{{jobId}}"] }
+          }
+        },
+        {
+          "name": "Get Job Candidates",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/jobs/{{jobId}}/candidates?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["jobs", "{{jobId}}", "candidates"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "minScore", "value": "0", "disabled": true },
+                { "key": "maxScore", "value": "100", "disabled": true },
+                { "key": "status", "value": "Accepted", "disabled": true },
+                { "key": "search", "value": "", "disabled": true },
+                { "key": "startDate", "value": "2024-01-01", "disabled": true },
+                { "key": "endDate", "value": "2024-12-31", "disabled": true }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "CVs",
+      "item": [
+        {
+          "name": "Upload CV",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "cv", "type": "file", "src": "", "description": "PDF or DOCX, max 5MB" },
+                { "key": "jobId", "value": "{{jobId}}", "type": "text", "description": "Required" },
+                { "key": "phoneNumber", "value": "+201234567890", "type": "text", "disabled": true },
+                { "key": "whatsappNumber", "value": "+201234567890", "type": "text", "disabled": true },
+                { "key": "coverLetter", "value": "Tell us why you are the perfect candidate...", "type": "text", "disabled": true }
+              ]
+            },
+            "url": { "raw": "{{baseUrl}}/cvs/upload", "host": ["{{baseUrl}}"], "path": ["cvs", "upload"] },
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "exec": [
+                    "var json = pm.response.json();",
+                    "if (pm.response.code === 201 && json.success && json.data && json.data.applicationId) {",
+                    "  pm.collectionVariables.set(\"cvId\", String(json.data.applicationId));",
+                    "}"
+                  ],
+                  "type": "text/javascript"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "Get All CVs",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/cvs?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["cvs"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "status", "value": "processed", "disabled": true },
+                { "key": "jobId", "value": "{{jobId}}", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Candidate Profile",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/cvs/{{cvId}}", "host": ["{{baseUrl}}"], "path": ["cvs", "{{cvId}}"] }
+          }
+        },
+        {
+          "name": "Download CV",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/cvs/{{cvId}}/download", "host": ["{{baseUrl}}"], "path": ["cvs", "{{cvId}}", "download"] }
+          }
+        },
+        {
+          "name": "Reprocess CV",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/cvs/{{cvId}}/reprocess", "host": ["{{baseUrl}}"], "path": ["cvs", "{{cvId}}", "reprocess"] }
+          }
+        },
+        {
+          "name": "Reject Candidate",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/cvs/{{cvId}}/reject", "host": ["{{baseUrl}}"], "path": ["cvs", "{{cvId}}", "reject"] }
+          }
+        },
+        {
+          "name": "Accept Candidate",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/cvs/{{cvId}}/accept", "host": ["{{baseUrl}}"], "path": ["cvs", "{{cvId}}", "accept"] }
+          }
+        },
+        {
+          "name": "Delete CV",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/cvs/{{cvId}}", "host": ["{{baseUrl}}"], "path": ["cvs", "{{cvId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Skills",
+      "item": [
+        {
+          "name": "Get All Skills",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/skills",
+              "host": ["{{baseUrl}}"],
+              "path": ["skills"],
+              "query": [{ "key": "category", "value": "technical", "disabled": true }]
+            }
+          }
+        },
+        {
+          "name": "Get Skill By ID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/skills/{{skillId}}", "host": ["{{baseUrl}}"], "path": ["skills", "{{skillId}}"] }
+          }
+        },
+        {
+          "name": "Create Skill",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"category\": \"technical\",\n  \"skills\": [\"NewSkill1\", \"NewSkill2\"],\n  \"synonyms\": {}\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/skills", "host": ["{{baseUrl}}"], "path": ["skills"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (pm.response.code === 201 && json.success && json.data && json.data.skill && json.data.skill._id) {",
+                  "  pm.collectionVariables.set(\"skillId\", String(json.data.skill._id));",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Skill",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"skills\": [\"UpdatedSkill1\", \"UpdatedSkill2\"]\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/skills/{{skillId}}", "host": ["{{baseUrl}}"], "path": ["skills", "{{skillId}}"] }
+          }
+        },
+        {
+          "name": "Delete Skill",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/skills/{{skillId}}", "host": ["{{baseUrl}}"], "path": ["skills", "{{skillId}}"] }
+          }
+        },
+        {
+          "name": "Import Skills",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"category\": \"technical\",\n  \"skills\": [\"Skill1\", \"Skill2\"],\n  \"synonyms\": {}\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/skills/import", "host": ["{{baseUrl}}"], "path": ["skills", "import"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "item": [
+        {
+          "name": "Get Stats",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": { "raw": "{{baseUrl}}/dashboard/stats", "host": ["{{baseUrl}}"], "path": ["dashboard", "stats"] }
+          }
+        },
+        {
+          "name": "Get Recent Activities",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/recent-activities?limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["dashboard", "recent-activities"],
+              "query": [{ "key": "limit", "value": "10" }]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

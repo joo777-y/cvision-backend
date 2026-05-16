@@ -1,0 +1,167 @@
+{
+  "technical": {
+    "programming_languages": [
+      "JavaScript",
+      "TypeScript",
+      "Python",
+      "Java",
+      "C++",
+      "C#",
+      "PHP",
+      "Ruby",
+      "Go",
+      "Rust",
+      "Swift",
+      "Kotlin",
+      "SQL",
+      "R",
+      "Scala",
+      "Perl",
+      "Shell",
+      "Bash"
+    ],
+    "web_frameworks": [
+      "React",
+      "Angular",
+      "Vue.js",
+      "Node.js",
+      "Express",
+      "Django",
+      "Flask",
+      "Spring Boot",
+      "ASP.NET",
+      "Laravel",
+      "Ruby on Rails",
+      "Next.js",
+      "Nuxt.js",
+      "FastAPI"
+    ],
+    "databases": [
+      "MongoDB",
+      "MySQL",
+      "PostgreSQL",
+      "Oracle",
+      "SQL Server",
+      "Redis",
+      "Cassandra",
+      "DynamoDB",
+      "Firebase",
+      "Elasticsearch",
+      "SQLite"
+    ],
+    "cloud_devops": [
+      "AWS",
+      "Azure",
+      "Google Cloud",
+      "Docker",
+      "Kubernetes",
+      "Jenkins",
+      "Git",
+      "GitHub",
+      "GitLab",
+      "CI/CD",
+      "Terraform",
+      "Ansible"
+    ],
+    "mobile": [
+      "React Native",
+      "Flutter",
+      "Android",
+      "iOS",
+      "Xamarin",
+      "Ionic"
+    ],
+    "data_ai": [
+      "Machine Learning",
+      "Deep Learning",
+      "TensorFlow",
+      "PyTorch",
+      "Pandas",
+      "NumPy",
+      "Scikit-learn",
+      "NLP",
+      "Computer Vision",
+      "Data Analysis",
+      "Big Data",
+      "Hadoop",
+      "Spark"
+    ],
+    "other": [
+      "REST API",
+      "GraphQL",
+      "Microservices",
+      "Agile",
+      "Scrum",
+      "Test-Driven Development",
+      "Object-Oriented Programming",
+      "Design Patterns",
+      "Data Structures",
+      "Algorithms"
+    ]
+  },
+  "soft": {
+    "communication": [
+      "Communication",
+      "Public Speaking",
+      "Presentation",
+      "Writing",
+      "Active Listening",
+      "Negotiation"
+    ],
+    "leadership": [
+      "Leadership",
+      "Team Management",
+      "Project Management",
+      "Mentoring",
+      "Coaching",
+      "Decision Making"
+    ],
+    "collaboration": [
+      "Teamwork",
+      "Collaboration",
+      "Conflict Resolution",
+      "Interpersonal Skills",
+      "Networking"
+    ],
+    "problem_solving": [
+      "Problem Solving",
+      "Critical Thinking",
+      "Analytical Skills",
+      "Creativity",
+      "Innovation",
+      "Research"
+    ],
+    "personal": [
+      "Time Management",
+      "Organization",
+      "Adaptability",
+      "Flexibility",
+      "Self-motivation",
+      "Work Ethic",
+      "Attention to Detail",
+      "Multitasking"
+    ]
+  },
+  "synonyms": {
+    "JavaScript": ["JS", "Javascript", "ECMAScript"],
+    "TypeScript": ["TS"],
+    "Python": ["Python3", "Py"],
+    "React": ["ReactJS", "React.js"],
+    "Node.js": ["NodeJS", "Node"],
+    "MongoDB": ["Mongo"],
+    "PostgreSQL": ["Postgres"],
+    "AWS": ["Amazon Web Services"],
+    "Azure": ["Microsoft Azure"],
+    "Google Cloud": ["GCP", "Google Cloud Platform"],
+    "Machine Learning": ["ML"],
+    "Deep Learning": ["DL"],
+    "Natural Language Processing": ["NLP"],
+    "CI/CD": ["Continuous Integration", "Continuous Deployment"],
+    "REST API": ["RESTful API", "REST"],
+    "Communication": ["Verbal Communication", "Written Communication"],
+    "Leadership": ["Lead", "Leading"],
+    "Problem Solving": ["Problem-Solving", "Troubleshooting"],
+    "Time Management": ["Time-Management"],
+    "Team Management": ["Team Lead", "Team Leadership"]
+  }
+}

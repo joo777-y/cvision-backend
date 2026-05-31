@@ -29,6 +29,6 @@ export const config = {
   },
   
   cors: {
-    origin: process.env.CORS_ORIGIN || '*', // في الإنتاج يفضل استخدام * أو رابط الـ Frontend
+    origin: process.env.CORS_ORIGIN,
   },
 };

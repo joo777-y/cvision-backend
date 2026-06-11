@@ -1,13 +1,19 @@
 import { Response } from "express";
-import { CV } from "../models";
+import { CV, Job } from "../models";
 import { asyncHandler } from "../middlewares/asyncHandler";
 import { sendSuccess } from "../utils/response";
 import { AuthRequest } from "../types";
 import { NotFoundError } from "../utils/errors";
 
 export const getAllCandidates = asyncHandler(
-  async (_req: AuthRequest, res: Response) => {
-    const cvs = await CV.find()
+  
+  async (req: AuthRequest, res: Response)=> {
+    const hrId = req.user?.userId;
+    const hrJobs = await Job.find({ createdBy: hrId }).select("_id");
+
+    const jobIds = hrJobs.map(job => job._id);
+
+    const cvs = await CV.find({ jobId: { $in: jobIds } })
       .populate("candidateId", "firstName lastName")
       .populate("jobId", "title")
       .sort({ uploadedAt: -1 });

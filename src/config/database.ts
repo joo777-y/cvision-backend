@@ -5,6 +5,7 @@ const DEFAULT_DB_NAME = 'cv-filtering';
 export const connectDatabase = async (): Promise<void> => {
   try {
     let mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017';
+    
     // إذا الرابط بدون اسم قاعدة بيانات (ينتهي بالمنفذ فقط) نضيف اسم القاعدة
     if (/^mongodb:\/\/[^/]+\/?$/.test(mongoUri)) {
       mongoUri = mongoUri.replace(/\/?$/, `/${DEFAULT_DB_NAME}`);

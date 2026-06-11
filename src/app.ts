@@ -2,7 +2,7 @@ import express, { Application } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
-import { config } from './config/env';
+// import { config } from './config/env';
 import { errorHandler, notFound } from './middlewares/errorHandler';
 
 import authRoutes from './routes/authRoutes';
@@ -20,7 +20,10 @@ app.use(helmet());
 // CORS
 app.use(
   cors({
-    origin: config.cors.origin,
+    origin: [
+      "http://localhost:5173",
+      "https://c-vision-one.vercel.app",
+    ],
     credentials: true,
   })
 );

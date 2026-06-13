@@ -54,7 +54,18 @@ export const register = asyncHandler(async (req: Request, res: Response) => {
     throw new ValidationError('fullName or (firstName and lastName) is required');
   }
 
-  const existingUser = await User.findOne({ email: emailVal });
+  const allUsers = await User.find({});
+
+console.log("TOTAL USERS:", allUsers.length);
+
+console.log(
+  "EMAILS:",
+  allUsers.map((u) => u.email)
+);
+
+const existingUser = await User.findOne({ email: emailVal });
+
+console.log("EXISTING USER:", existingUser);
 
 console.log("EMAIL SEARCH =>", emailVal);
 console.log("FOUND USER =>", existingUser);

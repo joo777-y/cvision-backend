@@ -12,10 +12,11 @@ export const connectDatabase = async (): Promise<void> => {
     }
     await mongoose.connect(mongoUri);
 
-    console.log("Connected DB:", mongoose.connection.db?.databaseName);
+    
     
     console.log('✅ MongoDB connected successfully');
-    
+    console.log("Connected DB:", mongoose.connection.db?.databaseName);
+    console.log('🔗 URI:', mongoUri);
     mongoose.connection.on('error', (err) => {
       console.error('❌ MongoDB connection error:', err);
     });

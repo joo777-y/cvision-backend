@@ -55,9 +55,13 @@ export const register = asyncHandler(async (req: Request, res: Response) => {
   }
 
   const existingUser = await User.findOne({ email: emailVal });
-  if (existingUser) {
-    throw new ConflictError('User with this email already exists');
-  }
+
+console.log("EMAIL SEARCH =>", emailVal);
+console.log("FOUND USER =>", existingUser);
+
+if (existingUser) {
+  throw new ConflictError('User with this email already exists');
+}
 
   const verificationCode = Math.floor(
     100000 + Math.random() * 900000

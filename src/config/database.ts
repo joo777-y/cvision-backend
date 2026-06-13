@@ -11,6 +11,8 @@ export const connectDatabase = async (): Promise<void> => {
       mongoUri = mongoUri.replace(/\/?$/, `/${DEFAULT_DB_NAME}`);
     }
     await mongoose.connect(mongoUri);
+
+    console.log("Connected DB:", mongoose.connection.db?.databaseName);
     
     console.log('✅ MongoDB connected successfully');
     

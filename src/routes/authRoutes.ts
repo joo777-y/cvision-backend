@@ -20,7 +20,7 @@ const router = Router();
 router.post('/register', registerValidation, validate, register);
 router.post('/login', loginValidation, validate, login);
 router.post('/verify-email', verifyEmail);
-router.patch("/approve/:id", approveHR);
+router.patch("/approve/:id", authenticate, approveHR);
 router.get('/profile', authenticate, getProfile);
 router.put(
   '/change-password',

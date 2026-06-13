@@ -166,9 +166,11 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
     throw new AuthenticationError('Invalid email or password');
   }
   if (!user.isVerified) {
-    throw new AuthenticationError(
-      'Please verify your email first'
-    );
+    throw new AuthenticationError("Please verify your email first");
+  }
+
+  if (user.role === "hr" && !user.isApproved) {
+    throw new AuthenticationError("Account pending admin approval");
   }
 
   const isPasswordValid = await user.comparePassword(password);
@@ -243,13 +245,10 @@ export const getProfile = asyncHandler(async (req: Request, res: Response) => {
 
   const user = await User.findById(userId);
   if (!user) {
-    throw new AuthenticationError('User not found');
+    throw new AuthenticationError("User not found");
   }
 
-  sendSuccess(res, 200, 'Profile fetched successfully', {
-    user: {
-      ...formatUserResponse(user),
-      createdAt: user.createdAt,
-    },
+  sendSuccess(res, 200, "Profile fetched", {
+    user: formatUserResponse(user)
   });
 });

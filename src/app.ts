@@ -33,17 +33,40 @@ app.use(
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
-  message: 'Too many requests from this IP, please try again later',
+
+  handler: (_req, res) => {
+    res.status(429).json({
+      success: false,
+      message:
+        "Too many requests from this IP, please try again later",
+    });
+  },
 });
 app.use('/api/', limiter);
 
-const authLimiter = rateLimit({
+const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 5,
-  message: 'Too many login attempts, please try again later',
+  max: 10,
+  handler: (_req, res) => {
+    res.status(429).json({
+      success: false,
+      message:
+        "Too many login attempts, please try again later",
+    });
+  },
 });
-app.use('/api/auth/login', authLimiter);
-app.use('/api/auth/register', authLimiter);
+
+  const registerLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 10,
+    handler: (_req, res) => {
+      res.status(429).json({
+        success: false,
+        message:
+          "Too many registration attempts, please try again later",
+      });
+    },
+  });
 
 // Body parser
 app.use(express.json());
@@ -55,6 +78,8 @@ app.get('/health', (_req, res) => {
 });
 
 // API routes
+app.use('/api/auth/login', loginLimiter);
+app.use('/api/auth/register', registerLimiter);
 app.use('/api/auth', authRoutes);
 app.use('/api/jobs', jobRoutes);
 app.use('/api/cvs', cvRoutes);

@@ -157,8 +157,8 @@ export const verifyEmail = asyncHandler(
     const { email, code } = req.body;
 
       const user = await User.findOne({
-        email: email.toLowerCase(),
-        verificationCode: code,
+        email: email.trim().toLowerCase(),
+        verificationCode: code.trim(),
       });
 
       if (!user) {

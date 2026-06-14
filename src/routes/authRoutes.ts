@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { verifyEmail } from '../controllers/authController';
+import { resendVerificationCode, verifyEmail } from '../controllers/authController';
 import {
   register,
   login,
@@ -20,6 +20,10 @@ const router = Router();
 router.post('/register', registerValidation, validate, register);
 router.post('/login', loginValidation, validate, login);
 router.post('/verify-email', verifyEmail);
+router.post(
+  "/resend-verification",
+  resendVerificationCode
+);
 router.patch("/approve/:id", authenticate, approveHR);
 router.get('/profile', authenticate, getProfile);
 router.put(

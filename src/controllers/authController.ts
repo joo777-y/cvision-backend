@@ -65,13 +65,44 @@ console.log(
 
 const existingUser = await User.findOne({ email: emailVal });
 
-console.log("EXISTING USER:", existingUser);
-
-console.log("EMAIL SEARCH =>", emailVal);
-console.log("FOUND USER =>", existingUser);
-
 if (existingUser) {
-  throw new ConflictError('User with this email already exists');
+
+  // لو الحساب متفعل بالفعل
+  if (existingUser.isVerified) {
+    throw new ConflictError('User with this email already exists');
+  }
+
+  // لو الحساب غير متفعل
+  const newCode = Math.floor(
+    100000 + Math.random() * 900000
+  ).toString();
+
+  existingUser.verificationCode = newCode;
+
+  existingUser.verificationCodeExpires = new Date(
+    Date.now() + 10 * 60 * 1000
+  );
+
+  await existingUser.save();
+
+  await transporter.sendMail({
+    from: process.env.EMAIL_USER,
+    to: emailVal,
+    subject: 'Verify Your Account',
+    html: `
+      <h2>Email Verification</h2>
+      <h1>${newCode}</h1>
+      <p>This code will expire in 10 minutes.</p>
+    `,
+  });
+
+  sendSuccess(
+  res,
+  200,
+  'A new verification code has been sent'
+);
+
+return;
 }
 
   const verificationCode = Math.floor(
@@ -219,6 +250,55 @@ export const changePassword = asyncHandler(
   }
 );
 
+
+  export const resendVerificationCode = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { email } = req.body;
+
+    const user = await User.findOne({
+      email: email.toLowerCase().trim(),
+    });
+
+    if (!user) {
+      throw new ValidationError("User not found");
+    }
+
+    if (user.isVerified) {
+      throw new ValidationError("Email already verified");
+    }
+
+    const verificationCode = Math.floor(
+      100000 + Math.random() * 900000
+    ).toString();
+
+    user.verificationCode = verificationCode;
+
+    user.verificationCodeExpires = new Date(
+      Date.now() + 10 * 60 * 1000
+    );
+
+    await user.save();
+
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: user.email,
+      subject: "Verify Your Account",
+      html: `
+        <h2>Email Verification</h2>
+        <h1>${verificationCode}</h1>
+        <p>This code will expire in 10 minutes.</p>
+      `,
+    });
+
+    sendSuccess(
+      res,
+      200,
+      "Verification code sent successfully"
+    );
+
+    return;
+  }
+);
 export const approveHR = asyncHandler(async (req, res): Promise<void> => {
 
   const user = await User.findById(req.params.id);

@@ -263,29 +263,38 @@ export const changePassword = asyncHandler(
     if (user.isVerified) {
       throw new ValidationError("Email already verified");
     }
+    
 
     const verificationCode = Math.floor(
-      100000 + Math.random() * 900000
-    ).toString();
+  100000 + Math.random() * 900000
+).toString();
 
-    user.verificationCode = verificationCode;
+console.log("GENERATED CODE =>", verificationCode);
 
-    user.verificationCodeExpires = new Date(
-      Date.now() + 10 * 60 * 1000
-    );
+user.verificationCode = verificationCode;
 
-    await user.save();
+await user.save();
 
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: user.email,
-      subject: "Verify Your Account",
-      html: `
-        <h2>Email Verification</h2>
-        <h1>${verificationCode}</h1>
-        <p>This code will expire in 10 minutes.</p>
-      `,
-    });
+console.log(
+  "CODE AFTER SAVE =>",
+  user.verificationCode
+);
+
+await transporter.sendMail({
+  from: process.env.EMAIL_USER,
+  to: user.email,
+  subject: "Verify Your Account",
+  html: `
+    <h2>Email Verification</h2>
+    <h1>${verificationCode}</h1>
+    <p>This code will expire in 10 minutes.</p>
+  `,
+});
+
+console.log(
+  "EMAIL SENT WITH CODE =>",
+  verificationCode
+);
 
     sendSuccess(
       res,

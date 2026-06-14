@@ -200,9 +200,9 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
     throw new AuthenticationError("Please verify your email first");
   }
 
-  if (user.role === "hr" && !user.isApproved) {
-    throw new AuthenticationError("Account pending admin approval");
-  }
+  // if (user.role === "hr" && !user.isApproved) {
+  //   throw new AuthenticationError("Account pending admin approval");
+  // }
 
   const isPasswordValid = await user.comparePassword(password);
   if (!isPasswordValid) {

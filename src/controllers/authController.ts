@@ -211,8 +211,7 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
     email: user.email,
     role: user.role,
     firstName: user.firstName,
-    companyName: user.companyName,
-    isApproved: user.isApproved,
+    companyName: user.companyName
   };
 
   const accessToken = generateAccessToken(tokenPayload);

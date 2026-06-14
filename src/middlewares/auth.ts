@@ -2,36 +2,40 @@ import { Response, NextFunction } from 'express';
 import { verifyAccessToken } from '../utils/jwt';
 import { AuthenticationError, AuthorizationError } from '../utils/errors';
 import { AuthRequest, UserRole } from '../types';
+import { User } from "../models";
 
-export const authenticate = (
+export const authenticate = async (
   req: AuthRequest,
   _res: Response,
   next: NextFunction
-): void => {
+): Promise<void> => {
   try {
-    // Get token from header
     const authHeader = req.headers.authorization;
 
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      throw new AuthenticationError('No token provided');
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      throw new AuthenticationError("No token provided");
     }
 
-    const token = authHeader.split(' ')[1];
+    const token = authHeader.split(" ")[1];
 
-    // Verify token
     const decoded = verifyAccessToken(token);
 
-    // Attach user info to request
+    const user = await User.findById(decoded.userId);
+
+    if (!user) {
+      throw new AuthenticationError("User not found");
+    }
+
     req.user = {
-      userId: decoded.userId,
-      email: decoded.email,
-      role: decoded.role,
-      isApproved: decoded.isApproved,
+      userId: user._id.toString(),
+      email: user.email,
+      role: user.role,
+      isApproved: user.isApproved,
     };
 
     next();
-  } catch (error) {
-    next(new AuthenticationError('Invalid or expired token'));
+  } catch {
+    next(new AuthenticationError("Invalid or expired token"));
   }
 };
 

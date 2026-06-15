@@ -11,6 +11,7 @@ import cvRoutes from './routes/cvRoutes';
 import skillsRoutes from './routes/skillsRoutes';
 import dashboardRoutes from './routes/dashboardRoutes';
 import candidatesRoutes from "./routes/candidatesRoutes";
+import { forgotPassword, resendVerificationCode } from './controllers/authController';
 
 const app: Application = express();
 app.set("trust proxy", 1);
@@ -86,6 +87,8 @@ app.use('/api/cvs', cvRoutes);
 app.use('/api/skills', skillsRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use("/api/candidates", candidatesRoutes);
+app.use("/api/auth/resend-verification", resendVerificationCode);
+app.use("/api/auth/forgot-password", forgotPassword);
 
 // 404 and error handler
 app.use(notFound);

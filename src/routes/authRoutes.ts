@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { resendVerificationCode, verifyEmail } from '../controllers/authController';
+import { forgotPassword, resendVerificationCode, resetPassword, verifyEmail } from '../controllers/authController';
 import {
   register,
   login,
@@ -23,6 +23,15 @@ router.post('/verify-email', verifyEmail);
 router.post(
   "/resend-verification",
   resendVerificationCode
+);
+router.post(
+  "/forgot-password",
+  forgotPassword
+);
+
+router.post(
+  "/reset-password",
+  resetPassword
 );
 router.patch("/approve/:id", authenticate, approveHR);
 router.get('/profile', authenticate, getProfile);

@@ -17,6 +17,8 @@ export interface IUser extends Document {
   companyName?: string;
   companyWebsite?: string;
   linkedinUrl?: string;
+  resetPasswordCode?: string;
+  resetPasswordExpires?: Date;
   createdAt: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
 }

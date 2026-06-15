@@ -80,6 +80,13 @@ const userSchema = new Schema<IUser>(
       type: Date,
       default: Date.now,
     },
+      resetPasswordCode: {
+    type: String,
+    },
+
+    resetPasswordExpires: {
+      type: Date,
+    },
   },
   {
     timestamps: true,

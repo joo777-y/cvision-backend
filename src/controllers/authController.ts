@@ -304,6 +304,94 @@ console.log(
     return;
   }
 );
+
+export const forgotPassword = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { email } = req.body;
+
+    const user = await User.findOne({
+      email: email.toLowerCase().trim(),
+    });
+
+    if (!user) {
+      throw new ValidationError("User not found");
+    }
+
+    const resetCode = Math.floor(
+      100000 + Math.random() * 900000
+    ).toString();
+
+    user.resetPasswordCode = resetCode;
+
+    user.resetPasswordExpires = new Date(
+      Date.now() + 10 * 60 * 1000
+    );
+
+    await user.save();
+
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: user.email,
+      subject: "Reset Password",
+      html: `
+        <h2>Reset Password</h2>
+        <h1>${resetCode}</h1>
+        <p>This code will expire in 10 minutes.</p>
+      `,
+    });
+
+    sendSuccess(
+      res,
+      200,
+      "Password reset code sent"
+    );
+  }
+);
+
+export const resetPassword = asyncHandler(
+  async (req: Request, res: Response) => {
+    const {
+      email,
+      code,
+      newPassword,
+    } = req.body;
+
+    const user = await User.findOne({
+      email: email.toLowerCase().trim(),
+      resetPasswordCode: code,
+    });
+
+    if (!user) {
+      throw new ValidationError(
+        "Invalid reset code"
+      );
+    }
+
+    if (
+      !user.resetPasswordExpires ||
+      user.resetPasswordExpires < new Date()
+    ) {
+      throw new ValidationError(
+        "Reset code expired"
+      );
+    }
+
+    user.password = newPassword;
+
+    user.resetPasswordCode = undefined;
+    user.resetPasswordExpires = undefined;
+
+    await user.save();
+
+    sendSuccess(
+      res,
+      200,
+      "Password reset successfully"
+    );
+  }
+);
+
+
 export const approveHR = asyncHandler(async (req, res): Promise<void> => {
 
   const user = await User.findById(req.params.id);

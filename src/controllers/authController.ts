@@ -348,6 +348,43 @@ export const forgotPassword = asyncHandler(
   }
 );
 
+export const verifyResetCode = asyncHandler(
+  async (req: Request, res: Response) => {
+
+    const { email, code } = req.body;
+
+
+    const user = await User.findOne({
+      email: email.toLowerCase().trim(),
+      resetPasswordCode: code,
+    });
+
+
+    if (!user) {
+      throw new ValidationError(
+        "Invalid reset code"
+      );
+    }
+
+
+    if (
+      !user.resetPasswordExpires ||
+      user.resetPasswordExpires < new Date()
+    ) {
+      throw new ValidationError(
+        "Reset code expired"
+      );
+    }
+
+
+    sendSuccess(
+      res,
+      200,
+      "Code verified successfully"
+    );
+  }
+);
+
 export const resetPassword = asyncHandler(
   async (req: Request, res: Response) => {
     const {

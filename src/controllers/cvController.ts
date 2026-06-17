@@ -15,6 +15,7 @@ import { parseCV, extractExperience, extractEducation } from '../services/parsin
 import { extractSkills } from '../services/nlpService';
 import { calculateMatchingScore } from '../services/scoringService';
 import { analyzeCVWithAI } from '../services/aiParsingService';
+import { runAIMatching } from "../services/aiMatchingService";
 
 // Upload CV
 export const uploadCV = asyncHandler(
@@ -131,49 +132,101 @@ const processCV = async (
     }
 
     // Calculate matching score
-    const score = calculateMatchingScore(
-      {
-        skills: extractedSkills,
-        experience,
-        education,
-      },
+    // Calculate matching score
+const score = calculateMatchingScore(
+  {
+    skills: extractedSkills,
+    experience,
+    education,
+  },
+  job
+);
+
+
+// AI Semantic Matching
+let aiMatch = null;
+
+try {
+
+  if (aiProfile) {
+
+    aiMatch = await runAIMatching(
+      aiProfile,
       job
     );
-    // console.log("TEXT:", rawText);
 
-    // console.log("SKILLS:", extractedSkills);
 
-    // console.log("EXPERIENCE:", experience);
+    console.log(
+      "AI MATCH RESULT:",
+      JSON.stringify(aiMatch, null, 2)
+    );
 
-    // console.log("JOB SKILLS:", job.requiredSkills);
-
-    // console.log("SCORE:", score);
-
-    // console.log("JOB REQUIRED SKILLS:", job.requiredSkills);
-
-    // console.log("FINAL SCORE:", score);
-
-    // Update CV with parsed data and score
-    await CV.findByIdAndUpdate(cvId, {
-      parsedData: {
-        rawText,
-        extractedSkills,
-        experience,
-        education,
-        aiAnalysis: aiProfile,
-      },
-      matchingScore: score.total,
-      scoreBreakdown: score.breakdown,
-      status: 'processed',
-      processedAt: new Date(),
-    });
-  } catch (error) {
-    console.error('Error processing CV:', error);
-    await CV.findByIdAndUpdate(cvId, {
-      status: 'rejected',
-    });
   }
-};
+
+
+} catch (error) {
+
+  console.error(
+    "AI Matching failed:",
+    error
+  );
+
+}
+
+
+// Update CV with parsed data and score
+await CV.findByIdAndUpdate(cvId, {
+
+  parsedData: {
+
+    rawText,
+
+    extractedSkills,
+
+    experience,
+
+    education,
+
+    aiAnalysis: aiProfile,
+
+  },
+
+
+  matchingScore: aiMatch?.matchScore || score.total,
+
+
+  scoreBreakdown: score.breakdown,
+
+
+  aiMatching: aiMatch ? {
+
+    matchedSkills: aiMatch.matchedSkills,
+
+    missingSkills: aiMatch.missingSkills,
+
+    explanation: aiMatch.explanation,
+
+  } : undefined,
+
+
+  status: 'processed',
+
+  processedAt: new Date(),
+
+});
+
+
+} catch (error) {
+
+  console.error('Error processing CV:', error);
+
+  await CV.findByIdAndUpdate(cvId, {
+
+    status: 'rejected',
+
+  });
+
+}
 
 // Map CV status to Figma display (Pending, Accepted, Rejected)
 const cvStatusToDisplay = (status: string): string => {

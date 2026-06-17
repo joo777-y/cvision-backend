@@ -101,6 +101,22 @@ const cvSchema = new Schema<ICV>(
         default: 0,
       },
     },
+    aiMatching:{
+      matchedSkills:{
+        type:[String],
+        default:[]
+      },
+
+      missingSkills:{
+        type:[String],
+        default:[]
+      },
+
+      explanation:{
+        type:String,
+        default:""
+      }
+    },
     status: {
       type: String,
       enum: ['pending', 'processed', 'rejected'],

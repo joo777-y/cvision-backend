@@ -77,6 +77,15 @@ export interface ICV extends Document {
     experienceScore: number;
     educationScore: number;
   };
+    aiMatching?: {
+
+    matchedSkills: string[];
+
+    missingSkills: string[];
+
+    explanation: string;
+
+  };
   status: 'pending' | 'processed' | 'rejected';
   uploadedAt: Date;
   processedAt?: Date;

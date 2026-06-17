@@ -42,9 +42,31 @@ Analyze this job description.
 
 Extract:
 
-- Technical skills
+-Extract ALL technical skills required for this role.
+Include:
+ programming languages
+ frameworks
+ libraries
+ tools
+ databases
+ APIs
+ technologies,
+Do not return general descriptions like:
+"Web Applications"
+"Frontend Development",
+Return only concrete technologies.
+
 - Soft skills
 - Required years of experience
+
+Look for experience numbers like:
+"2 years"
+"3+ years"
+"minimum experience"
+"at least"
+
+Return only the number.
+
 - Required education level
 
 

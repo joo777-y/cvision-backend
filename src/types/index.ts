@@ -64,7 +64,7 @@ export interface ICV extends Document {
   coverLetter?: string;
   parsedData: {
     rawText: string;
-    extractedSkills: {
+    extractedSkills?: {
       technical: string[];
       soft: string[];
     };

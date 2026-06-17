@@ -74,10 +74,9 @@ const jobSchema = new Schema<IJob>(
       default: 0,
     },
     requiredEducation: {
-      type: String,
-      enum: ['High School', 'Bachelor', 'Master', 'PhD', 'Other'],
-      default: 'Other',
-    },
+        type: String,
+        default: 'Other',
+      },
     benefits: {
       type: String,
       trim: true,

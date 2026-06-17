@@ -4,47 +4,185 @@ import { asyncHandler } from '../middlewares/asyncHandler';
 import { sendSuccess } from '../utils/response';
 import { NotFoundError, AuthorizationError } from '../utils/errors';
 import { AuthRequest } from '../types';
+import { analyzeJobWithAI } from '../services/aiJobAnalysisService';
 
 // Create new job - maps jobTitle/jobDescription (Figma) to title/description
 export const createJob = asyncHandler(
   async (req: AuthRequest, res: Response) => {
+
     const userId = req.user?.userId;
     const body = req.body;
 
+
+    const description =
+      body.description || body.jobDescription;
+
+
+
+    // 🤖 Gemini Job Analysis
+    let aiJobAnalysis = null;
+
+    try {
+
+      aiJobAnalysis =
+        await analyzeJobWithAI(description);
+
+
+      console.log(
+        "AI JOB PROFILE:",
+        aiJobAnalysis
+      );
+
+
+    } catch (error) {
+
+      console.log(
+        "Gemini Job Analysis Failed, using fallback"
+      );
+
+    }
+
+
+
     const jobData: Record<string, any> = {
-      title: body.title || body.jobTitle,
-      description: body.description || body.jobDescription,
-      requirements: body.requirements,
-      responsibilities: body.responsibilities,
-      location: body.location,
-      jobType: body.jobType,
-      department: body.department,
-      salaryRange: body.salaryRange,
-      status: body.status || 'draft',
-      createdBy: userId,
+
+      title:
+        body.title || body.jobTitle,
+
+
+      description,
+
+
+      requirements:
+        body.requirements,
+
+
+      responsibilities:
+        body.responsibilities,
+
+
+      location:
+        body.location,
+
+
+      jobType:
+        body.jobType,
+
+
+      department:
+        body.department,
+
+
+      salaryRange:
+        body.salaryRange,
+
+
+      status:
+        body.status || 'draft',
+
+
+      createdBy:
+        userId,
     };
 
-    // Optional scoring fields and Figma fields
-    if (body.requiredSkills) {
-      jobData.requiredSkills = body.requiredSkills;
-    }
-    const experience =
-      body.requiredExperience ?? body.experience;
-    if (experience !== undefined) {
-      jobData.requiredExperience = Number(experience);
-    }
-    if (body.requiredEducation) {
-      jobData.requiredEducation = body.requiredEducation;
-    }
-    if (body.benefits !== undefined) {
-      jobData.benefits = body.benefits;
+
+
+
+    // 👇 AI fills these if available
+
+    if(aiJobAnalysis){
+
+
+      jobData.requiredSkills = {
+
+        technical:
+          aiJobAnalysis.technicalSkills,
+
+
+        soft:
+          aiJobAnalysis.softSkills
+
+      };
+
+
+
+      jobData.requiredExperience =
+        aiJobAnalysis.requiredExperience;
+
+
+
+      jobData.requiredEducation =
+        aiJobAnalysis.requiredEducation;
+
+
     }
 
-    const job = await Job.create(jobData);
 
-    sendSuccess(res, 201, 'Job created successfully', {
-      job: formatJobResponse(job, 0),
-    });
+
+    // fallback manual fields
+
+    else {
+
+
+      if(body.requiredSkills){
+
+        jobData.requiredSkills =
+          body.requiredSkills;
+
+      }
+
+
+
+      const experience =
+        body.requiredExperience ??
+        body.experience;
+
+
+
+      if(experience !== undefined){
+
+        jobData.requiredExperience =
+          Number(experience);
+
+      }
+
+
+
+      if(body.requiredEducation){
+
+        jobData.requiredEducation =
+          body.requiredEducation;
+
+      }
+
+    }
+
+
+
+    if(body.benefits !== undefined){
+
+      jobData.benefits =
+        body.benefits;
+
+    }
+
+
+
+    const job =
+      await Job.create(jobData);
+
+
+
+    sendSuccess(
+      res,
+      201,
+      'Job created successfully',
+      {
+        job:
+        formatJobResponse(job,0),
+      }
+    );
+
   }
 );
 

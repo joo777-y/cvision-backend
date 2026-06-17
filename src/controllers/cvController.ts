@@ -227,6 +227,7 @@ await CV.findByIdAndUpdate(cvId, {
   });
 
 }
+};
 
 // Map CV status to Figma display (Pending, Accepted, Rejected)
 const cvStatusToDisplay = (status: string): string => {

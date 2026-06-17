@@ -3,21 +3,21 @@ import "dotenv/config";
 
 
 export async function runAIMatching(
-  candidateProfile: any,
-  job: any
+ candidateProfile:any,
+ job:any
 ){
 
 
 const jobProfile = {
 
-  requiredSkills:
-    job.requiredSkills,
+ requiredSkills:
+ job.requiredSkills,
 
-  requiredExperience:
-    job.requiredExperience,
+ requiredExperience:
+ job.requiredExperience,
 
-  requiredEducation:
-    job.requiredEducation
+ requiredEducation:
+ job.requiredEducation
 
 };
 
@@ -25,13 +25,12 @@ const jobProfile = {
 
 const result =
 await semanticMatch(
-  candidateProfile,
-  jobProfile
+ candidateProfile,
+ jobProfile
 );
 
 
 
 return result;
-
 
 }

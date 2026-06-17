@@ -28,7 +28,9 @@ export interface AIJobProfile {
 
 
 export async function analyzeJobWithAI(
- description:string
+ description:string,
+ requirements:string,
+ responsibilities:string,
 ):Promise<AIJobProfile>{
 
 
@@ -76,7 +78,18 @@ JOB DESCRIPTION:
 
 ${description}
 
+
+REQUIREMENTS:
+
+${requirements}
+
+
+RESPONSIBILITIES:
+
+${responsibilities}
+
 `;
+
 
 
 const response = await askGemini(prompt);

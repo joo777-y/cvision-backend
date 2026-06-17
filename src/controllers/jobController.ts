@@ -15,8 +15,15 @@ export const createJob = asyncHandler(
 
 
     const description =
-      body.description || body.jobDescription;
+        body.description || body.jobDescription;
 
+
+        const requirements =
+        body.requirements || "";
+
+
+        const responsibilities =
+        body.responsibilities || "";
 
 
     // 🤖 Gemini Job Analysis
@@ -25,7 +32,11 @@ export const createJob = asyncHandler(
     try {
 
       aiJobAnalysis =
-        await analyzeJobWithAI(description);
+        await analyzeJobWithAI(
+          description,
+          requirements,
+          responsibilities
+        );
 
 
       console.log(

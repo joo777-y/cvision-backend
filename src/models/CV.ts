@@ -60,6 +60,26 @@ const cvSchema = new Schema<ICV>(
         type: String,
         default: '',
       },
+
+      aiAnalysis: {
+        technicalSkills: [String],
+        softSkills: [String],
+
+        experience: {
+          type: String,
+          default: 0,
+        },
+
+        education: {
+          type: String,
+          default: '',
+        },
+
+        summary: {
+          type: String,
+          default: '',
+        },
+      },
     },
     matchingScore: {
       type: Number,

@@ -19,29 +19,32 @@ export const getAllCandidates = asyncHandler(
       .sort({ uploadedAt: -1 });
 
     const candidates = cvs.map((cv: any) => ({
-      id: cv._id,
+  id: cv._id,
 
-      name:
-        cv.candidateId
-          ? `${cv.candidateId.firstName} ${cv.candidateId.lastName}`
-          : cv.fullName || "Unknown",
+  name:
+    cv.candidateId
+      ? `${cv.candidateId.firstName} ${cv.candidateId.lastName}`
+      : cv.fullName || "Unknown",
 
-      job:
-        cv.jobId?.title || "Unknown",
+  job:
+    cv.jobId?.title || "Unknown",
 
-      status: cv.status,
+  status: cv.status,
 
-      cvScore: cv.matchingScore || 0,
+  cvScore: cv.matchingScore || 0,
 
-      appliedOn: new Date(cv.uploadedAt).toLocaleDateString(),
+  appliedOn: new Date(cv.uploadedAt).toLocaleDateString(),
 
-      experience: cv.parsedData?.experience || 0,
 
-      skills: [
-        ...(cv.parsedData?.extractedSkills?.technical || []),
-        ...(cv.parsedData?.extractedSkills?.soft || []),
-      ],
-    }));
+  experience:
+    cv.parsedData?.experience || "",
+
+
+  skills: [
+    ...(cv.parsedData?.extractedSkills?.technical || []),
+    ...(cv.parsedData?.extractedSkills?.soft || []),
+  ],
+}));
 
     sendSuccess(
       res,
@@ -65,33 +68,49 @@ export const getCandidateById = asyncHandler(
     }
 
     const candidate: any = {
-      id: cv._id,
+  id: cv._id,
 
-      name: cv.candidateId
-        ? `${(cv.candidateId as any).firstName} ${(cv.candidateId as any).lastName}`
-        : cv.fullName || "Unknown",
+  name: cv.candidateId
+    ? `${(cv.candidateId as any).firstName} ${(cv.candidateId as any).lastName}`
+    : cv.fullName || "Unknown",
 
-      email: (cv.candidateId as any)?.email || "",
+  email: (cv.candidateId as any)?.email || "",
 
-      job: (cv.jobId as any)?.title || "",
+  job: (cv.jobId as any)?.title || "",
 
-      status: cv.status,
+  status: cv.status,
 
-      cvScore: cv.matchingScore || 0,
+  cvScore: cv.matchingScore || 0,
 
-      appliedOn: new Date(cv.uploadedAt).toLocaleDateString(),
+  appliedOn: new Date(cv.uploadedAt).toLocaleDateString(),
 
-      skills: [
-        ...(cv.parsedData?.extractedSkills?.technical || []),
-        ...(cv.parsedData?.extractedSkills?.soft || []),
-      ],
 
-      education: cv.parsedData?.education || [],
+  skills: [
+    ...(cv.parsedData?.extractedSkills?.technical || []),
+    ...(cv.parsedData?.extractedSkills?.soft || []),
+  ],
 
-      experience: cv.parsedData?.experience || [],
 
-      cvUrl: `${process.env.BASE_URL}/api/cvs/${cv._id}/download`,
-    };
+  education: cv.parsedData?.education || "",
+
+
+  experience: cv.parsedData?.experience
+    ? [
+        {
+          id: 1,
+          title: "Experience",
+          company: "",
+          location: "",
+          from: "",
+          to: "",
+          description: String(cv.parsedData.experience),
+        }
+      ]
+    : [],
+
+
+  cvUrl: `${process.env.BASE_URL}/api/cvs/${cv._id}/download`,
+};
 
     sendSuccess(
       res,

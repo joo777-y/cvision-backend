@@ -195,8 +195,12 @@ await CV.findByIdAndUpdate(cvId, {
   matchingScore: aiMatch?.matchScore || score.total,
 
 
-  scoreBreakdown: score.breakdown,
-
+scoreBreakdown: {
+  aiScore: aiMatch?.matchScore || 0,
+  skillsScore: score.breakdown.skillsScore,
+  experienceScore: score.breakdown.experienceScore,
+  educationScore: score.breakdown.educationScore,
+},
 
   aiMatching: aiMatch ? {
 

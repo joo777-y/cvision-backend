@@ -14,6 +14,7 @@ import {
 import { parseCV, extractExperience, extractEducation } from '../services/parsingService';
 import { extractSkills } from '../services/nlpService';
 import { calculateMatchingScore } from '../services/scoringService';
+import { analyzeCVWithAI } from '../services/aiParsingService';
 
 // Upload CV
 export const uploadCV = asyncHandler(
@@ -94,6 +95,24 @@ const processCV = async (
     // Parse CV to extract text
     const rawText = await parseCV(fileBuffer, mimeType);
 
+    // Analyze CV using Gemini AI
+      let aiProfile = null;
+
+      try {
+
+        aiProfile = await analyzeCVWithAI(rawText);
+
+        console.log("AI PROFILE:", aiProfile);
+
+      } catch(error){
+
+        console.error(
+          "Gemini analysis failed:",
+          error
+        );
+
+      }
+
     // Extract skills using NLP
     const extractedSkills = await extractSkills(rawText);
 
@@ -116,19 +135,19 @@ const processCV = async (
       },
       job
     );
-    console.log("TEXT:", rawText);
+    // console.log("TEXT:", rawText);
 
-    console.log("SKILLS:", extractedSkills);
+    // console.log("SKILLS:", extractedSkills);
 
-    console.log("EXPERIENCE:", experience);
+    // console.log("EXPERIENCE:", experience);
 
-    console.log("JOB SKILLS:", job.requiredSkills);
+    // console.log("JOB SKILLS:", job.requiredSkills);
 
-    console.log("SCORE:", score);
+    // console.log("SCORE:", score);
 
-    console.log("JOB REQUIRED SKILLS:", job.requiredSkills);
+    // console.log("JOB REQUIRED SKILLS:", job.requiredSkills);
 
-    console.log("FINAL SCORE:", score);
+    // console.log("FINAL SCORE:", score);
 
     // Update CV with parsed data and score
     await CV.findByIdAndUpdate(cvId, {
@@ -137,6 +156,7 @@ const processCV = async (
         extractedSkills,
         experience,
         education,
+        aiAnalysis: aiProfile,
       },
       matchingScore: score.total,
       scoreBreakdown: score.breakdown,

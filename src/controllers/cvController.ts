@@ -102,7 +102,11 @@ const processCV = async (
 
         aiProfile = await analyzeCVWithAI(rawText);
 
-        console.log("AI PROFILE:", aiProfile);
+        console.log(
+          "AI PROFILE:",
+          JSON.stringify(aiProfile, null, 2)
+        );
+
 
       } catch(error){
 

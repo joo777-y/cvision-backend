@@ -55,6 +55,8 @@ ${cvText}
 
 
 const response = await askGemini(prompt);
+console.log("GEMINI RESPONSE:");
+console.log(response);
 
 
 

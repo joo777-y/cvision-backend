@@ -321,7 +321,10 @@ export const getCVById = asyncHandler(
       },
       skills,
       coverLetter: cv.coverLetter,
+
+      aiMatching: cv.aiMatching,
     };
+    
 
     sendSuccess(res, 200, 'CV fetched successfully', {
       candidate: candidateProfile,

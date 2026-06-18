@@ -51,6 +51,11 @@ export const uploadCV = asyncHandler(
         uploadedBy: userId,
       }
     );
+    console.log("UPLOAD DATA:", {
+  fullName,
+  email,
+  phoneNumber,
+});
 
     // Create CV record
     const cv = await CV.create({
@@ -250,6 +255,8 @@ export const getCVs = asyncHandler(async (req: AuthRequest, res: Response) => {
     return {
       id: cv._id,
       name: cv.fullName,
+      phoneNumber: cv.phoneNumber,
+      email: cv.email,
       status: cvStatusToDisplay(cv.status),
       jobTitle: job && typeof job === 'object' ? job.title : 'Unknown',
       applicationDate: cv.uploadedAt,
@@ -294,6 +301,8 @@ export const getCVById = asyncHandler(
       id: cv._id,
       fullName: cv.fullName,
       email: cv.email,
+      phoneNumber: cv.phoneNumber,
+whatsappNumber: cv.whatsappNumber,
       title: (cv.jobId as any)?.title,
       cvScores: {
         overallScore: cv.matchingScore,

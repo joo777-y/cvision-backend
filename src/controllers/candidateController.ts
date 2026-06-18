@@ -41,9 +41,9 @@ export const getAllCandidates = asyncHandler(
 
 
   skills: [
-    ...(cv.parsedData?.extractedSkills?.technical || []),
-    ...(cv.parsedData?.extractedSkills?.soft || []),
-  ],
+  ...(cv.parsedData?.aiAnalysis?.technicalSkills || []),
+  ...(cv.parsedData?.aiAnalysis?.softSkills || []),
+],
 }));
 
     sendSuccess(
@@ -99,27 +99,30 @@ console.log(JSON.stringify(cv.parsedData?.experience, null, 2));
 
 
   skills: [
-    ...(cv.parsedData?.extractedSkills?.technical || []),
-    ...(cv.parsedData?.extractedSkills?.soft || []),
-  ],
+  ...(cv.parsedData?.aiAnalysis?.technicalSkills || []),
+  ...(cv.parsedData?.aiAnalysis?.softSkills || []),
+],
 
 
-  education: cv.parsedData?.education || "",
+  education:
+  cv.parsedData?.aiAnalysis?.education ||
+  cv.parsedData?.education ||
+  "",
 
 
-  experience: cv.parsedData?.experience
-    ? [
-        {
-          id: 1,
-          title: "Experience",
-          company: "",
-          location: "",
-          from: "",
-          to: "",
-          description: String(cv.parsedData.experience),
-        }
-      ]
-    : [],
+  experience: cv.parsedData?.aiAnalysis?.experience
+  ? [
+      {
+        id: 1,
+        title: "Experience",
+        company: "",
+        location: "",
+        from: "",
+        to: "",
+        description: cv.parsedData.aiAnalysis.experience,
+      },
+    ]
+  : [],
 
 
   cvUrl: `${process.env.BASE_URL}/api/cvs/${cv._id}/download`,

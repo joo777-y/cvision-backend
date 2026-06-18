@@ -63,14 +63,24 @@ export interface ICV extends Document {
   mimeType?: string;
   coverLetter?: string;
   parsedData: {
-    rawText: string;
-    extractedSkills?: {
-      technical: string[];
-      soft: string[];
-    };
-    experience: number;
-    education: string;
+  rawText: string;
+
+  extractedSkills?: {
+    technical: string[];
+    soft: string[];
   };
+
+  aiAnalysis?: {
+    technicalSkills: string[];
+    softSkills: string[];
+    experience: string;
+    education: string;
+    summary: string;
+  };
+
+  experience: number;
+  education: string;
+};
   matchingScore: number;
   scoreBreakdown: {
     skillsScore: number;

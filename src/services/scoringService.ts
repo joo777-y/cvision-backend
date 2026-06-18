@@ -1,12 +1,6 @@
 import { IJob } from '../types';
 
-const EDUCATION_SCORES: { [key: string]: number } = {
-  PhD: 100,
-  Master: 80,
-  Bachelor: 60,
-  'High School': 40,
-  Other: 30,
-};
+
 
 export const calculateSkillsScore = (
   candidateSkills: { technical: string[]; soft: string[] },
@@ -30,9 +24,14 @@ export const calculateSkillsScore = (
     totalWeight += requiredSkill.weight;
 
     const hasSkill = candidateSkills.technical.some(
-      (candidateSkill) =>
-        candidateSkill.toLowerCase() === requiredSkill.name.toLowerCase()
-    );
+  (candidateSkill) =>
+    candidateSkill
+      .toLowerCase()
+      .includes(requiredSkill.name.toLowerCase()) ||
+    requiredSkill.name
+      .toLowerCase()
+      .includes(candidateSkill.toLowerCase())
+);
 
     if (hasSkill) {
       matchedWeight += requiredSkill.weight;
@@ -44,9 +43,14 @@ export const calculateSkillsScore = (
     totalWeight += requiredSkill.weight;
 
     const hasSkill = candidateSkills.soft.some(
-      (candidateSkill) =>
-        candidateSkill.toLowerCase() === requiredSkill.name.toLowerCase()
-    );
+  (candidateSkill) =>
+    candidateSkill
+      .toLowerCase()
+      .includes(requiredSkill.name.toLowerCase()) ||
+    requiredSkill.name
+      .toLowerCase()
+      .includes(candidateSkill.toLowerCase())
+);
 
     if (hasSkill) {
       matchedWeight += requiredSkill.weight;
@@ -62,32 +66,82 @@ export const calculateExperienceScore = (
   candidateExperience: number,
   requiredExperience: number
 ): number => {
+
   if (requiredExperience === 0) {
-    return 100; // No experience required
+
+    return candidateExperience > 0 ? 100 : 50;
+
   }
 
+
   const ratio = candidateExperience / requiredExperience;
-  return Math.min(ratio, 1) * 100;
+
+  return Math.round(Math.min(ratio,1)*100);
 };
 
 export const calculateEducationScore = (
   candidateEducation: string,
   requiredEducation: string
 ): number => {
-  const candidateScore = EDUCATION_SCORES[candidateEducation] || 0;
-  const requiredScore = EDUCATION_SCORES[requiredEducation] || 0;
 
-  if (requiredScore === 0) {
-    return 100;
-  }
 
-  // If candidate has equal or higher education, give full score
-  if (candidateScore >= requiredScore) {
-    return 100;
-  }
+const candidateText = candidateEducation.toLowerCase();
+const requiredText = requiredEducation.toLowerCase();
 
-  // Otherwise, give proportional score
-  return (candidateScore / requiredScore) * 100;
+
+let candidateLevel = 0;
+let requiredLevel = 0;
+
+
+
+if(candidateText.includes("phd"))
+candidateLevel = 100;
+
+else if(
+candidateText.includes("master")
+)
+candidateLevel = 80;
+
+else if(
+candidateText.includes("bachelor") ||
+candidateText.includes("b.sc") ||
+candidateText.includes("b.s")
+)
+candidateLevel = 60;
+else if(
+ candidateText.includes("undergraduate") ||
+ candidateText.includes("student")
+)
+candidateLevel = 50;
+
+
+
+if(requiredText.includes("phd"))
+requiredLevel = 100;
+
+else if(requiredText.includes("master"))
+requiredLevel = 80;
+
+else if(
+requiredText.includes("bachelor")
+)
+requiredLevel = 60;
+
+
+
+if(requiredLevel === 0)
+return 50;
+
+
+
+if(candidateLevel >= requiredLevel)
+return 100;
+
+
+return Math.round(
+(candidateLevel / requiredLevel) * 100
+);
+
 };
 
 export const calculateMatchingScore = (

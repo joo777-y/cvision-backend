@@ -120,17 +120,17 @@ const processCV = async (
 
     // Calculate matching score
     // Calculate matching score
-    const score = calculateMatchingScore(
-      {
-        skills: {
-          technical: aiProfile?.technicalSkills || [],
-          soft: aiProfile?.softSkills || [],
-        },
-        experience,
-        education,
-      },
-      job
-    );
+   const score = calculateMatchingScore(
+  {
+    skills: {
+      technical: aiProfile?.technicalSkills || [],
+      soft: aiProfile?.softSkills || [],
+    },
+    experience,
+    education,
+  },
+  job
+);
 
     // AI Semantic Matching
     let aiMatch = null;

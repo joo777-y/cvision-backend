@@ -9,75 +9,70 @@ export const calculateSkillsScore = (
     soft: Array<{ name: string; weight: number }>;
   }
 ): number => {
-  if (
-    requiredSkills.technical.length === 0 &&
-    requiredSkills.soft.length === 0
-  ) {
-    return 0;
-  }
 
-  let totalWeight = 0;
-  let matchedWeight = 0;
 
-  // Calculate technical skills score with weights
-  requiredSkills.technical.forEach((requiredSkill) => {
-    totalWeight += requiredSkill.weight;
+const allCandidateSkills = [
+  ...candidateSkills.technical,
+  ...candidateSkills.soft,
+].map(s => s.toLowerCase());
 
-    const hasSkill = candidateSkills.technical.some(
-  (candidateSkill) =>
-    candidateSkill
-      .toLowerCase()
-      .includes(requiredSkill.name.toLowerCase()) ||
-    requiredSkill.name
-      .toLowerCase()
-      .includes(candidateSkill.toLowerCase())
+
+const allRequiredSkills = [
+  ...requiredSkills.technical,
+  ...requiredSkills.soft,
+];
+
+
+if(allRequiredSkills.length === 0)
+return 0;
+
+
+let matched = 0;
+
+
+allRequiredSkills.forEach(skill => {
+
+ const found = allCandidateSkills.some(
+   candidate =>
+   candidate.includes(skill.name.toLowerCase()) ||
+   skill.name.toLowerCase().includes(candidate)
+ );
+
+
+ if(found)
+ matched++;
+
+});
+
+
+return Math.round(
+ (matched / allRequiredSkills.length) * 100
 );
 
-    if (hasSkill) {
-      matchedWeight += requiredSkill.weight;
-    }
-  });
 
-  // Calculate soft skills score with weights
-  requiredSkills.soft.forEach((requiredSkill) => {
-    totalWeight += requiredSkill.weight;
-
-    const hasSkill = candidateSkills.soft.some(
-  (candidateSkill) =>
-    candidateSkill
-      .toLowerCase()
-      .includes(requiredSkill.name.toLowerCase()) ||
-    requiredSkill.name
-      .toLowerCase()
-      .includes(candidateSkill.toLowerCase())
-);
-
-    if (hasSkill) {
-      matchedWeight += requiredSkill.weight;
-    }
-  });
-
-  if (totalWeight === 0) return 0;
-
-  return (matchedWeight / totalWeight) * 100;
 };
 
 export const calculateExperienceScore = (
-  candidateExperience: number,
-  requiredExperience: number
-): number => {
+ candidateExperience:number,
+ requiredExperience:number
+)=>{
 
-  if (requiredExperience === 0) {
+ if(requiredExperience === 0){
 
-    return candidateExperience > 0 ? 100 : 50;
+   return candidateExperience > 0 ? 100 : 0;
 
-  }
+ }
 
 
-  const ratio = candidateExperience / requiredExperience;
+ if(candidateExperience >= requiredExperience)
+ return 100;
 
-  return Math.round(Math.min(ratio,1)*100);
-};
+
+ return Math.round(
+ (candidateExperience / requiredExperience) * 100
+ );
+
+}
 
 export const calculateEducationScore = (
   candidateEducation: string,
@@ -103,9 +98,12 @@ candidateText.includes("master")
 candidateLevel = 80;
 
 else if(
-candidateText.includes("bachelor") ||
-candidateText.includes("b.sc") ||
-candidateText.includes("b.s")
+ candidateText.includes("bachelor") ||
+ candidateText.includes("b.sc") ||
+ candidateText.includes("b.s") ||
+ candidateText.includes("undergraduate") ||
+ candidateText.includes("information technology") ||
+ candidateText.includes("computer science")
 )
 candidateLevel = 60;
 else if(

@@ -109,7 +109,9 @@ const processCV = async (
     const extractedSkills = await extractSkills(rawText);
 
     // Extract experience and education
-    const experience = extractExperience(rawText);
+    const experience =
+ extractExperience(rawText) ||
+ (aiProfile?.experience ? 1 : 0);
     const education = extractEducation(rawText);
 
     // Get job details

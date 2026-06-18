@@ -86,6 +86,7 @@ export interface ICV extends Document {
     skillsScore: number;
     experienceScore: number;
     educationScore: number;
+    aiScore:number;
   };
     aiMatching?: {
 

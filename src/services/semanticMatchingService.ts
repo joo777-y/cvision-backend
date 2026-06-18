@@ -52,6 +52,15 @@ skillsScore = 60%
 experienceScore = 25%
 educationScore = 15%
 
+Experience:
+- Compare years of experience, internships, and relevant projects.
+- Do not give 100% unless candidate experience fully matches the job requirement.
+
+Education:
+- Compare the degree level with the required education.
+- Bachelor should not automatically equal Master.
+
+
 The final matchScore must be between 0 and 100.
 Do not return decimal values like 0.9.
 

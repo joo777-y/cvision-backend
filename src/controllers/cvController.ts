@@ -160,11 +160,12 @@ const processCV = async (
         aiAnalysis: aiProfile,
       },
 
-      matchingScore: aiMatch?.matchScore
-        ? aiMatch.matchScore <= 1
-          ? aiMatch.matchScore * 100
-          : aiMatch.matchScore
-        : score.total,
+      matchingScore:
+  aiMatch?.matchScore !== undefined
+    ? aiMatch.matchScore <= 1
+      ? aiMatch.matchScore * 100
+      : aiMatch.matchScore
+    : score.total,
 
       scoreBreakdown: {
 
@@ -282,9 +283,12 @@ export const getCVById = asyncHandler(
 
     const candidate = cv.candidateId as any;
     const skills = [
-      ...(cv.parsedData?.extractedSkills?.technical || []),
-      ...(cv.parsedData?.extractedSkills?.soft || []),
-    ];
+
+ ...(cv.parsedData?.aiAnalysis?.technicalSkills || []),
+
+ ...(cv.parsedData?.aiAnalysis?.softSkills || [])
+
+];
 
     const candidateProfile = {
       id: cv._id,

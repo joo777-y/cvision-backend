@@ -103,15 +103,19 @@ const processCV = async (
     let aiProfile = null;
 
     try {
-      aiProfile = await analyzeCVWithAI(rawText);
+  aiProfile = await analyzeCVWithAI(rawText);
 
-      console.log('AI PROFILE:', JSON.stringify(aiProfile, null, 2));
-    } catch (error) {
-      console.error('Gemini analysis failed:', error);
-    }
+  console.log("🔥 AI PROFILE:", aiProfile);
+
+} catch (error) {
+  console.error("🔥 GEMINI ERROR FULL:", error);
+}
 
     // Extract skills using NLP
     const extractedSkills = await extractSkills(rawText);
+
+    console.log("RAW TEXT HAS REACT?", rawText.includes("React"));
+console.log("SKILLS RESULT:", extractedSkills);
 
     // Extract experience and education
     const experience =

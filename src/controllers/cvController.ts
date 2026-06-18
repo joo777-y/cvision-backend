@@ -11,24 +11,22 @@ import {
   deleteFileFromGridFS,
   streamFileFromGridFS,
 } from '../services/gridfsService';
-import { parseCV, extractExperience, extractEducation } from '../services/parsingService';
+import {
+  parseCV,
+  extractExperience,
+  extractEducation,
+} from '../services/parsingService';
 import { extractSkills } from '../services/nlpService';
 import { calculateMatchingScore } from '../services/scoringService';
 import { analyzeCVWithAI } from '../services/aiParsingService';
-import { runAIMatching } from "../services/aiMatchingService";
+import { runAIMatching } from '../services/aiMatchingService';
 
 // Upload CV
 export const uploadCV = asyncHandler(
   async (req: AuthRequest, res: Response) => {
     const userId = req.user?.userId || null;
-    const {
-      jobId,
-      fullName,
-      email,
-      phoneNumber,
-      whatsappNumber,
-      coverLetter,
-    } = req.body;
+    const { jobId, fullName, email, phoneNumber, whatsappNumber, coverLetter } =
+      req.body;
 
     if (!req.file) {
       throw new ValidationError('No file uploaded');
@@ -97,26 +95,15 @@ const processCV = async (
     const rawText = await parseCV(fileBuffer, mimeType);
 
     // Analyze CV using Gemini AI
-      let aiProfile = null;
+    let aiProfile = null;
 
-      try {
+    try {
+      aiProfile = await analyzeCVWithAI(rawText);
 
-        aiProfile = await analyzeCVWithAI(rawText);
-
-        console.log(
-          "AI PROFILE:",
-          JSON.stringify(aiProfile, null, 2)
-        );
-
-
-      } catch(error){
-
-        console.error(
-          "Gemini analysis failed:",
-          error
-        );
-
-      }
+      console.log('AI PROFILE:', JSON.stringify(aiProfile, null, 2));
+    } catch (error) {
+      console.error('Gemini analysis failed:', error);
+    }
 
     // Extract skills using NLP
     const extractedSkills = await extractSkills(rawText);
@@ -133,104 +120,75 @@ const processCV = async (
 
     // Calculate matching score
     // Calculate matching score
-const score = calculateMatchingScore(
-  {
-    skills: extractedSkills,
-    experience,
-    education,
-  },
-  job
-);
-
-
-// AI Semantic Matching
-let aiMatch = null;
-
-try {
-
-  if (aiProfile) {
-
-    aiMatch = await runAIMatching(
-      aiProfile,
+    const score = calculateMatchingScore(
+      {
+        skills: {
+          technical: aiProfile?.technicalSkills || [],
+          soft: aiProfile?.softSkills || [],
+        },
+        experience,
+        education,
+      },
       job
     );
 
+    // AI Semantic Matching
+    let aiMatch = null;
 
-    console.log(
-      "AI MATCH RESULT:",
-      JSON.stringify(aiMatch, null, 2)
-    );
+    try {
+      if (aiProfile) {
+        aiMatch = await runAIMatching(aiProfile, job);
 
+        console.log('AI MATCH RESULT:', JSON.stringify(aiMatch, null, 2));
+      }
+    } catch (error) {
+      console.error('AI Matching failed:', error);
+    }
+
+    // Update CV with parsed data and score
+    await CV.findByIdAndUpdate(cvId, {
+      parsedData: {
+        rawText,
+
+        extractedSkills,
+
+        experience,
+
+        education,
+
+        aiAnalysis: aiProfile,
+      },
+
+      matchingScore: aiMatch?.matchScore || score.total,
+
+      scoreBreakdown: {
+        aiScore: aiMatch?.matchScore || 0,
+        skillsScore: score.breakdown.skillsScore,
+        experienceScore: score.breakdown.experienceScore,
+        educationScore: score.breakdown.educationScore,
+      },
+
+      aiMatching: aiMatch
+        ? {
+            matchedSkills: aiMatch.matchedSkills,
+
+            missingSkills: aiMatch.missingSkills,
+
+            explanation: aiMatch.explanation,
+          }
+        : undefined,
+
+      status: 'processed',
+
+      processedAt: new Date(),
+    });
+  } catch (error) {
+    console.error('Error processing CV:', error);
+
+    await CV.findByIdAndUpdate(cvId, {
+      status: 'rejected',
+    });
   }
-
-
-} catch (error) {
-
-  console.error(
-    "AI Matching failed:",
-    error
-  );
-
-}
-
-
-// Update CV with parsed data and score
-await CV.findByIdAndUpdate(cvId, {
-
-  parsedData: {
-
-    rawText,
-
-    extractedSkills,
-
-    experience,
-
-    education,
-
-    aiAnalysis: aiProfile,
-
-  },
-
-
-  matchingScore: aiMatch?.matchScore || score.total,
-
-
-scoreBreakdown: {
-  aiScore: aiMatch?.matchScore || 0,
-  skillsScore: score.breakdown.skillsScore,
-  experienceScore: score.breakdown.experienceScore,
-  educationScore: score.breakdown.educationScore,
-},
-
-  aiMatching: aiMatch ? {
-
-    matchedSkills: aiMatch.matchedSkills,
-
-    missingSkills: aiMatch.missingSkills,
-
-    explanation: aiMatch.explanation,
-
-  } : undefined,
-
-
-  status: 'processed',
-
-  processedAt: new Date(),
-
-});
-
-
-} catch (error) {
-
-  console.error('Error processing CV:', error);
-
-  await CV.findByIdAndUpdate(cvId, {
-
-    status: 'rejected',
-
-  });
-
-}
 };
 
 // Map CV status to Figma display (Pending, Accepted, Rejected)
@@ -273,8 +231,7 @@ export const getCVs = asyncHandler(async (req: AuthRequest, res: Response) => {
       id: cv._id,
       name: cv.fullName,
       status: cvStatusToDisplay(cv.status),
-      jobTitle:
-        job && typeof job === 'object' ? job.title : 'Unknown',
+      jobTitle: job && typeof job === 'object' ? job.title : 'Unknown',
       applicationDate: cv.uploadedAt,
       appliedAt: cv.uploadedAt,
     };
@@ -323,7 +280,14 @@ export const getCVById = asyncHandler(
       },
       workExperience: [], // Parsed CV doesn't extract structured exp - could parse rawText later
       education: cv.parsedData?.education
-        ? [{ degree: cv.parsedData.education, institution: '', startDate: '', endDate: '' }]
+        ? [
+            {
+              degree: cv.parsedData.education,
+              institution: '',
+              startDate: '',
+              endDate: '',
+            },
+          ]
         : [],
       contactInformation: {
         email: candidate?.email,

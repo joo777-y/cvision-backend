@@ -66,6 +66,19 @@ export const getCandidateById = asyncHandler(
     if (!cv) {
     throw new NotFoundError("Candidate not found");
     }
+    console.log(
+  "PARSED DATA FROM DB =>",
+  JSON.stringify(cv.parsedData, null, 2)
+);
+
+console.log("PARSED DATA =>");
+console.log(JSON.stringify(cv.parsedData, null, 2));
+
+console.log("EXTRACTED SKILLS =>");
+console.log(JSON.stringify(cv.parsedData?.extractedSkills, null, 2));
+
+console.log("EXPERIENCE =>");
+console.log(JSON.stringify(cv.parsedData?.experience, null, 2));
 
     const candidate: any = {
   id: cv._id,

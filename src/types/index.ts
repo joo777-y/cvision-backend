@@ -86,7 +86,7 @@ export interface ICV extends Document {
     skillsScore: number;
     experienceScore: number;
     educationScore: number;
-    aiScore:number;
+    aiScore?:number;
   };
     aiMatching?: {
 
@@ -131,19 +131,32 @@ export interface JWTPayload {
 
 export interface ParsedCV {
   rawText: string;
+
   skills: {
     technical: string[];
     soft: string[];
   };
+
+  aiAnalysis?: {
+    technicalSkills: string[];
+    softSkills: string[];
+    experience: string;
+    education: string;
+    summary: string;
+  };
+
   experience: number;
+
   education: string;
 }
 
 export interface MatchingScore {
   total: number;
+
   breakdown: {
     skillsScore: number;
     experienceScore: number;
     educationScore: number;
+    aiScore?: number;
   };
 }

@@ -299,8 +299,8 @@ export const getCVById = asyncHandler(
 
     const candidateProfile = {
       id: cv._id,
-      name: cv.fullName,
-      email: cv.email,
+      name: `${candidate.firstName || ''} ${candidate.lastName || ''}`.trim() || cv.fullName,
+email: candidate.email || cv.email,
       phoneNumber: cv.phoneNumber,
 whatsappNumber: cv.whatsappNumber,
       title: (cv.jobId as any)?.title,

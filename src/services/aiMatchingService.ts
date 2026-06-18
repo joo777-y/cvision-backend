@@ -3,34 +3,53 @@ import "dotenv/config";
 
 
 export async function runAIMatching(
- candidateProfile:any,
- job:any
-){
+  candidateProfile: any,
+  job: any
+) {
 
 
-const jobProfile = {
+  const normalizedCandidate = {
 
- requiredSkills:
- job.requiredSkills,
+    skills: [
+      ...(candidateProfile.technicalSkills || []),
+      ...(candidateProfile.softSkills || [])
+    ],
 
- requiredExperience:
- job.requiredExperience,
+    experience:
+      candidateProfile.experience || "",
 
- requiredEducation:
- job.requiredEducation
+    education:
+      candidateProfile.education || ""
 
-};
-
-
-
-const result =
-await semanticMatch(
- candidateProfile,
- jobProfile
-);
+  };
 
 
+  const normalizedJob = {
 
-return result;
+    skills: [
+      ...(job.requiredSkills?.technical || [])
+        .map((skill:any) => skill.name),
+
+      ...(job.requiredSkills?.soft || [])
+        .map((skill:any) => skill.name)
+    ],
+
+    experience:
+      job.requiredExperience || 0,
+
+    education:
+      job.requiredEducation || ""
+
+  };
+
+
+
+  const result = await semanticMatch(
+    normalizedCandidate,
+    normalizedJob
+  );
+
+
+  return result;
 
 }

@@ -110,8 +110,7 @@ const processCV = async (
 
     // Extract experience and education
     const experience =
- extractExperience(rawText) ||
- (aiProfile?.experience ? 1 : 0);
+      extractExperience(rawText) || (aiProfile?.experience ? 1 : 0);
     const education = extractEducation(rawText);
 
     // Get job details
@@ -122,17 +121,17 @@ const processCV = async (
 
     // Calculate matching score
     // Calculate matching score
-   const score = calculateMatchingScore(
-  {
-    skills: {
-      technical: aiProfile?.technicalSkills || [],
-      soft: aiProfile?.softSkills || [],
-    },
-    experience,
-    education,
-  },
-  job
-);
+    const score = calculateMatchingScore(
+      {
+        skills: {
+          technical: aiProfile?.technicalSkills || [],
+          soft: aiProfile?.softSkills || [],
+        },
+        experience,
+        education,
+      },
+      job
+    );
 
     // AI Semantic Matching
     let aiMatch = null;
@@ -161,14 +160,32 @@ const processCV = async (
         aiAnalysis: aiProfile,
       },
 
-      matchingScore: aiMatch?.matchScore || score.total,
+      matchingScore: aiMatch?.matchScore
+        ? aiMatch.matchScore <= 1
+          ? aiMatch.matchScore * 100
+          : aiMatch.matchScore
+        : score.total,
 
       scoreBreakdown: {
-        aiScore: aiMatch?.matchScore || 0,
-        skillsScore: score.breakdown.skillsScore,
-        experienceScore: score.breakdown.experienceScore,
-        educationScore: score.breakdown.educationScore,
-      },
+
+  aiScore:
+    aiMatch?.matchScore || score.total,
+
+  skillsScore:
+    aiMatch?.skillsScore ??
+    score.breakdown.skillsScore,
+
+
+  experienceScore:
+    aiMatch?.experienceScore ??
+    score.breakdown.experienceScore,
+
+
+  educationScore:
+    aiMatch?.educationScore ??
+    score.breakdown.educationScore,
+
+},
 
       aiMatching: aiMatch
         ? {

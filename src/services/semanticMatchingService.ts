@@ -1,33 +1,26 @@
-import { askGemini } from "./geminiService";
-import "dotenv/config";
-
-
+import { askGemini } from './geminiService';
+import 'dotenv/config';
 
 export interface MatchingResult {
+  matchScore: number;
 
-  matchScore:number;
+  matchedSkills: string[];
 
-  matchedSkills:string[];
+  missingSkills: string[];
 
-  missingSkills:string[];
+  explanation: string;
 
-  explanation:string;
-
+  skillsScore: number;
+  experienceScore: number;
+  educationScore: number;
 }
 
-
-
 export async function semanticMatch(
+  candidateProfile: any,
 
- candidateProfile:any,
-
- jobProfile:any
-
-):Promise<MatchingResult>{
-
-
-
-const prompt = `
+  jobProfile: any
+): Promise<MatchingResult> {
+  const prompt = `
 
 You are an AI ATS matching system.
 
@@ -35,42 +28,54 @@ You are an AI ATS matching system.
 Compare this candidate profile with this job profile.
 
 
-Analyze:
+Analyze this like a professional ATS system.
 
-1. Matching technical skills
-2. Missing skills
-3. Overall match percentage
+Rules:
 
-
-Important:
-
-Understand synonyms.
+- Skill similarity is the most important factor.
+- Related technologies should match.
+- Do not require exact names.
+- Frontend technologies are related.
 
 Examples:
 
-React Developer = React.js
+React.js matches React
 
-Frontend = HTML CSS JavaScript React
+MERN stack matches MongoDB Express React Node
 
-Backend = Node.js Express MongoDB
+Frontend Developer matches:
+HTML CSS JavaScript React
 
+Calculate:
 
-Return ONLY JSON.
+skillsScore = 60%
+experienceScore = 25%
+educationScore = 15%
+
+The final matchScore must be between 0 and 100.
+Do not return decimal values like 0.9.
+
+Return JSON only.
+
 
 
 
 Format:
 
 {
-
 "matchScore":0,
+
+"skillsScore":0,
+
+"experienceScore":0,
+
+"educationScore":0,
 
 "matchedSkills":[],
 
 "missingSkills":[],
 
 "explanation":""
-
 }
 
 
@@ -89,22 +94,9 @@ ${JSON.stringify(jobProfile)}
 
 `;
 
+  const response = await askGemini(prompt);
 
+  const cleaned = response.replace('```json', '').replace('```', '').trim();
 
-const response =
- await askGemini(prompt);
-
-
-
-const cleaned =
-response
-.replace("```json","")
-.replace("```","")
-.trim();
-
-
-
-return JSON.parse(cleaned);
-
-
+  return JSON.parse(cleaned);
 }

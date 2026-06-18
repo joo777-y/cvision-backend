@@ -313,8 +313,8 @@ export const getCVById = asyncHandler(
           ]
         : [],
       contactInformation: {
-        email: candidate?.email,
-        phone: cv.phoneNumber,
+        email: cv.email,
+  phone: cv.phoneNumber,
         location: null,
         portfolioUrl: null,
         whatsappNumber: cv.whatsappNumber,

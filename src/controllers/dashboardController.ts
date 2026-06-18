@@ -7,12 +7,13 @@ import mongoose from 'mongoose';
 
 // Map CV status to Figma display (Pending, Accepted, Rejected)
 const cvStatusToDisplay = (status: string): string => {
-  const map: Record<string, string> = {
-    pending: 'Pending',
-    processed: 'Accepted',
-    rejected: 'Rejected',
+   const map: Record<string, string> = {
+    pending: 'new',
+    processed: 'reviewed',
+    rejected: 'rejected',
   };
-  return map[status] || status;
+
+  return map[status] || 'new';
 };
 
 // Get dashboard statistics - Figma HR Dashboard format

@@ -133,6 +133,7 @@ export const getDashboardStats = asyncHandler(
           : 'Unknown',
 
       status: cvStatusToDisplay(cv.status),
+      cvScore: cv.matchingScore || 0,
       appliedOn: new Date(cv.uploadedAt).toLocaleDateString("en-GB"),
     }));
 

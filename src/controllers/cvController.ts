@@ -299,7 +299,7 @@ export const getCVById = asyncHandler(
 
     const candidateProfile = {
       id: cv._id,
-      fullName: cv.fullName,
+      name: cv.fullName,
       email: cv.email,
       phoneNumber: cv.phoneNumber,
 whatsappNumber: cv.whatsappNumber,

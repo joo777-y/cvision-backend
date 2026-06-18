@@ -136,6 +136,7 @@ export const getDashboardStats = asyncHandler(
       cvScore: cv.matchingScore || 0,
       appliedOn: new Date(cv.uploadedAt).toLocaleDateString("en-GB"),
     }));
+    console.log("RECENT APPLICATION RESPONSE =>", recentApplications[0]);
 
     const stats = {
       totalActiveJobs,

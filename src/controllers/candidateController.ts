@@ -1,138 +1,122 @@
-import { Response } from "express";
-import { CV, Job } from "../models";
-import { asyncHandler } from "../middlewares/asyncHandler";
-import { sendSuccess } from "../utils/response";
-import { AuthRequest } from "../types";
-import { NotFoundError } from "../utils/errors";
+import { Response } from 'express';
+import { CV, Job } from '../models';
+import { asyncHandler } from '../middlewares/asyncHandler';
+import { sendSuccess } from '../utils/response';
+import { AuthRequest } from '../types';
+import { NotFoundError } from '../utils/errors';
 
 export const getAllCandidates = asyncHandler(
-  
-  async (req: AuthRequest, res: Response)=> {
+  async (req: AuthRequest, res: Response) => {
     const hrId = req.user?.userId;
-    const hrJobs = await Job.find({ createdBy: hrId }).select("_id");
+    const hrJobs = await Job.find({ createdBy: hrId }).select('_id');
 
-    const jobIds = hrJobs.map(job => job._id);
+    const jobIds = hrJobs.map((job) => job._id);
 
     const cvs = await CV.find({ jobId: { $in: jobIds } })
-      .populate("candidateId", "firstName lastName")
-      .populate("jobId", "title")
+      .populate('candidateId', 'firstName lastName')
+      .populate('jobId', 'title')
       .sort({ uploadedAt: -1 });
 
     const candidates = cvs.map((cv: any) => ({
-  id: cv._id,
+      id: cv._id,
 
-  name:
-    cv.candidateId
-      ? `${cv.candidateId.firstName} ${cv.candidateId.lastName}`
-      : cv.fullName || "Unknown",
+      name: cv.candidateId
+        ? `${cv.candidateId.firstName} ${cv.candidateId.lastName}`
+        : cv.fullName || 'Unknown',
 
-  job:
-    cv.jobId?.title || "Unknown",
+      job: cv.jobId?.title || 'Unknown',
 
-  status: cv.status,
+      status: cv.status,
 
-  cvScore: cv.matchingScore || 0,
+      cvScore: cv.matchingScore || 0,
 
-  appliedOn: new Date(cv.uploadedAt).toLocaleDateString(),
+      appliedOn: new Date(cv.uploadedAt).toLocaleDateString(),
 
+      experience: cv.parsedData?.experience || '',
 
-  experience:
-    cv.parsedData?.experience || "",
+      skills: [
+        ...(cv.parsedData?.aiAnalysis?.technicalSkills || []),
+        ...(cv.parsedData?.aiAnalysis?.softSkills || []),
+      ],
+    }));
 
-
-  skills: [
-  ...(cv.parsedData?.aiAnalysis?.technicalSkills || []),
-  ...(cv.parsedData?.aiAnalysis?.softSkills || []),
-],
-}));
-
-    sendSuccess(
-      res,
-      200,
-      "Candidates fetched successfully",
-      candidates
-    );
+    sendSuccess(res, 200, 'Candidates fetched successfully', candidates);
   }
 );
 
 export const getCandidateById = asyncHandler(
-  async (req: AuthRequest, res: Response) =>{
+  async (req: AuthRequest, res: Response) => {
     const { id } = req.params;
 
     const cv = await CV.findById(id)
-      .populate("candidateId", "firstName lastName email")
-      .populate("jobId", "title");
+      .populate('candidateId', 'firstName lastName email')
+      .populate('jobId', 'title');
 
     if (!cv) {
-    throw new NotFoundError("Candidate not found");
+      throw new NotFoundError('Candidate not found');
     }
     console.log(
-  "PARSED DATA FROM DB =>",
-  JSON.stringify(cv.parsedData, null, 2)
-);
+      'PARSED DATA FROM DB =>',
+      JSON.stringify(cv.parsedData, null, 2)
+    );
 
-console.log("PARSED DATA =>");
-console.log(JSON.stringify(cv.parsedData, null, 2));
+    console.log('PARSED DATA =>');
+    console.log(JSON.stringify(cv.parsedData, null, 2));
 
-console.log("EXTRACTED SKILLS =>");
-console.log(JSON.stringify(cv.parsedData?.extractedSkills, null, 2));
+    console.log('EXTRACTED SKILLS =>');
+    console.log(JSON.stringify(cv.parsedData?.extractedSkills, null, 2));
 
-console.log("EXPERIENCE =>");
-console.log(JSON.stringify(cv.parsedData?.experience, null, 2));
+    console.log('EXPERIENCE =>');
+    console.log(JSON.stringify(cv.parsedData?.experience, null, 2));
 
     const candidate: any = {
-  id: cv._id,
+      id: cv._id,
 
-  name: cv.candidateId
-    ? `${(cv.candidateId as any).firstName} ${(cv.candidateId as any).lastName}`
-    : cv.fullName || "Unknown",
+      name: cv.candidateId
+        ? `${(cv.candidateId as any).firstName} ${(cv.candidateId as any).lastName}`
+        : cv.fullName || 'Unknown',
 
-  email: (cv.candidateId as any)?.email || "",
+      email: (cv.candidateId as any)?.email || '',
 
-  job: (cv.jobId as any)?.title || "",
+      job: (cv.jobId as any)?.title || '',
 
-  status: cv.status,
+      status: cv.status,
 
-  cvScore: cv.matchingScore || 0,
+      cvScore: cv.matchingScore || 0,
 
-  appliedOn: new Date(cv.uploadedAt).toLocaleDateString(),
+      skillMatch: cv.scoreBreakdown?.skillsScore || 0,
 
+      experienceMatch: cv.scoreBreakdown?.experienceScore || 0,
 
-  skills: [
-  ...(cv.parsedData?.aiAnalysis?.technicalSkills || []),
-  ...(cv.parsedData?.aiAnalysis?.softSkills || []),
-],
+      educationMatch: cv.scoreBreakdown?.educationScore || 0,
 
+      appliedOn: new Date(cv.uploadedAt).toLocaleDateString(),
 
-  education:
-  cv.parsedData?.aiAnalysis?.education ||
-  cv.parsedData?.education ||
-  "",
+      skills: [
+        ...(cv.parsedData?.aiAnalysis?.technicalSkills || []),
+        ...(cv.parsedData?.aiAnalysis?.softSkills || []),
+      ],
 
+      education:
+        cv.parsedData?.aiAnalysis?.education || cv.parsedData?.education || '',
 
-  experience: cv.parsedData?.aiAnalysis?.experience
-  ? [
-      {
-        id: 1,
-        title: "Experience",
-        company: "",
-        location: "",
-        from: "",
-        to: "",
-        description: cv.parsedData.aiAnalysis.experience,
-      },
-    ]
-  : [],
+      experience: cv.parsedData?.aiAnalysis?.experience
+        ? [
+            {
+              id: 1,
+              title: 'Experience',
+              company: '',
+              location: '',
+              from: '',
+              to: '',
+              description: cv.parsedData.aiAnalysis.experience,
+            },
+          ]
+        : [],
 
+      cvUrl: `${process.env.BASE_URL}/api/cvs/${cv._id}/download`,
+    };
 
-  cvUrl: `${process.env.BASE_URL}/api/cvs/${cv._id}/download`,
-};
-
-    sendSuccess(
-      res,
-      200,
-      "Candidate fetched successfully",
-      candidate
-    );
+    sendSuccess(res, 200, 'Candidate fetched successfully', candidate);
   }
 );

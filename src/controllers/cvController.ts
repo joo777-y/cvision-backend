@@ -51,11 +51,11 @@ export const uploadCV = asyncHandler(
         uploadedBy: userId,
       }
     );
-    console.log("UPLOAD DATA:", {
-  fullName,
-  email,
-  phoneNumber,
-});
+    console.log('UPLOAD DATA:', {
+      fullName,
+      email,
+      phoneNumber,
+    });
 
     // Create CV record
     const cv = await CV.create({
@@ -103,19 +103,18 @@ const processCV = async (
     let aiProfile = null;
 
     try {
-  aiProfile = await analyzeCVWithAI(rawText);
+      aiProfile = await analyzeCVWithAI(rawText);
 
-  console.log("🔥 AI PROFILE:", aiProfile);
-
-} catch (error) {
-  console.error("🔥 GEMINI ERROR FULL:", error);
-}
+      console.log('🔥 AI PROFILE:', aiProfile);
+    } catch (error) {
+      console.error('🔥 GEMINI ERROR FULL:', error);
+    }
 
     // Extract skills using NLP
     const extractedSkills = await extractSkills(rawText);
 
-    console.log("RAW TEXT HAS REACT?", rawText.includes("React"));
-console.log("SKILLS RESULT:", extractedSkills);
+    console.log('RAW TEXT HAS REACT?', rawText.includes('React'));
+    console.log('SKILLS RESULT:', extractedSkills);
 
     // Extract experience and education
     const experience =
@@ -170,32 +169,23 @@ console.log("SKILLS RESULT:", extractedSkills);
       },
 
       matchingScore:
-  aiMatch?.matchScore !== undefined
-    ? aiMatch.matchScore <= 1
-      ? aiMatch.matchScore * 100
-      : aiMatch.matchScore
-    : score.total,
+        aiMatch?.matchScore !== undefined
+          ? aiMatch.matchScore <= 1
+            ? aiMatch.matchScore * 100
+            : aiMatch.matchScore
+          : score.total,
 
       scoreBreakdown: {
+        aiScore: aiMatch?.matchScore || score.total,
 
-  aiScore:
-    aiMatch?.matchScore || score.total,
+        skillsScore: aiMatch?.skillsScore ?? score.breakdown.skillsScore,
 
-  skillsScore:
-    aiMatch?.skillsScore ??
-    score.breakdown.skillsScore,
+        experienceScore:
+          aiMatch?.experienceScore ?? score.breakdown.experienceScore,
 
-
-  experienceScore:
-    aiMatch?.experienceScore ??
-    score.breakdown.experienceScore,
-
-
-  educationScore:
-    aiMatch?.educationScore ??
-    score.breakdown.educationScore,
-
-},
+        educationScore:
+          aiMatch?.educationScore ?? score.breakdown.educationScore,
+      },
 
       aiMatching: aiMatch
         ? {
@@ -294,19 +284,20 @@ export const getCVById = asyncHandler(
 
     const candidate = cv.candidateId as any;
     const skills = [
+      ...(cv.parsedData?.aiAnalysis?.technicalSkills || []),
 
- ...(cv.parsedData?.aiAnalysis?.technicalSkills || []),
-
- ...(cv.parsedData?.aiAnalysis?.softSkills || [])
-
-];
+      ...(cv.parsedData?.aiAnalysis?.softSkills || []),
+    ];
 
     const candidateProfile = {
       id: cv._id,
-      name: `${candidate.firstName || ''} ${candidate.lastName || ''}`.trim() || cv.fullName,
-email: candidate.email || cv.email,
+       status: cv.status,
+      name:
+        `${candidate.firstName || ''} ${candidate.lastName || ''}`.trim() ||
+        cv.fullName,
+      email: candidate.email || cv.email,
       phoneNumber: cv.phoneNumber,
-whatsappNumber: cv.whatsappNumber,
+      whatsappNumber: cv.whatsappNumber,
       title: (cv.jobId as any)?.title,
       cvScores: {
         overallScore: cv.matchingScore,
@@ -327,7 +318,7 @@ whatsappNumber: cv.whatsappNumber,
         : [],
       contactInformation: {
         email: cv.email,
-  phone: cv.phoneNumber,
+        phone: cv.phoneNumber,
         location: null,
         portfolioUrl: null,
         whatsappNumber: cv.whatsappNumber,
@@ -337,7 +328,6 @@ whatsappNumber: cv.whatsappNumber,
 
       aiMatching: cv.aiMatching,
     };
-    
 
     sendSuccess(res, 200, 'CV fetched successfully', {
       candidate: candidateProfile,

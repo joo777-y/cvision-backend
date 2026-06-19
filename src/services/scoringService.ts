@@ -174,7 +174,7 @@ export const calculateMatchingScore = (
 
   // Weighted total: Skills 50%, Experience 30%, Education 20%
   const total =
-    skillsScore * 0.5 + experienceScore * 0.3 + educationScore * 0.2;
+    skillsScore * 0.7 + experienceScore * 0.2 + educationScore * 0.1;
 
   return {
     total: Math.round(total * 100) / 100, // Round to 2 decimal places

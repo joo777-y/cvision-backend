@@ -48,9 +48,9 @@ HTML CSS JavaScript React
 
 Calculate:
 
-skillsScore = 60%
-experienceScore = 25%
-educationScore = 15%
+skillsScore = 70%
+experienceScore = 20%
+educationScore = 10%
 
 Experience:
 - Compare years of experience, internships, and relevant projects.
@@ -86,6 +86,7 @@ Format:
 
 "explanation":""
 }
+
 
 
 

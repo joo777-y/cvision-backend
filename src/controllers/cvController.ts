@@ -329,9 +329,7 @@ export const getCVById = asyncHandler(
       aiMatching: cv.aiMatching,
     };
 
-    sendSuccess(res, 200, 'CV fetched successfully', {
-      candidate: candidateProfile,
-    });
+    sendSuccess(res, 200, 'CV fetched successfully', candidateProfile);
   }
 );
 

@@ -9,191 +9,92 @@ import { analyzeJobWithAI } from '../services/aiJobAnalysisService';
 // Create new job - maps jobTitle/jobDescription (Figma) to title/description
 export const createJob = asyncHandler(
   async (req: AuthRequest, res: Response) => {
-
     const userId = req.user?.userId;
     const body = req.body;
 
+    const description = body.description || body.jobDescription;
 
-    const description =
-        body.description || body.jobDescription;
+    const requirements = body.requirements || '';
 
-
-        const requirements =
-        body.requirements || "";
-
-
-        const responsibilities =
-        body.responsibilities || "";
-
+    const responsibilities = body.responsibilities || '';
 
     // 🤖 Gemini Job Analysis
     let aiJobAnalysis = null;
 
     try {
-
-      aiJobAnalysis =
-        await analyzeJobWithAI(
-          description,
-          requirements,
-          responsibilities
-        );
-
-
-      console.log(
-        "AI JOB PROFILE:",
-        aiJobAnalysis
+      aiJobAnalysis = await analyzeJobWithAI(
+        description,
+        requirements,
+        responsibilities
       );
 
-
+      console.log('AI JOB PROFILE:', aiJobAnalysis);
     } catch (error) {
-
-      console.log(
-        "Gemini Job Analysis Failed, using fallback"
-      );
-
+      console.log('Gemini Job Analysis Failed, using fallback');
     }
 
-
-
     const jobData: Record<string, any> = {
-
-      title:
-        body.title || body.jobTitle,
-
+      title: body.title || body.jobTitle,
 
       description,
 
+      requirements: body.requirements,
 
-      requirements:
-        body.requirements,
+      responsibilities: body.responsibilities,
 
+      location: body.location,
 
-      responsibilities:
-        body.responsibilities,
+      jobType: body.jobType,
 
+      department: body.department,
 
-      location:
-        body.location,
+      salaryRange: body.salaryRange,
 
+      status: body.status || 'draft',
 
-      jobType:
-        body.jobType,
-
-
-      department:
-        body.department,
-
-
-      salaryRange:
-        body.salaryRange,
-
-
-      status:
-        body.status || 'draft',
-
-
-      createdBy:
-        userId,
+      createdBy: userId,
     };
-
-
-
 
     // 👇 AI fills these if available
 
-    if(aiJobAnalysis){
-
-
+    if (aiJobAnalysis) {
       jobData.requiredSkills = {
+        technical: aiJobAnalysis.technicalSkills,
 
-        technical:
-          aiJobAnalysis.technicalSkills,
-
-
-        soft:
-          aiJobAnalysis.softSkills
-
+        soft: aiJobAnalysis.softSkills,
       };
 
+      jobData.requiredExperience = aiJobAnalysis.requiredExperience;
 
-
-      jobData.requiredExperience =
-        aiJobAnalysis.requiredExperience;
-
-
-
-      jobData.requiredEducation =
-        aiJobAnalysis.requiredEducation;
-
-
+      jobData.requiredEducation = aiJobAnalysis.requiredEducation;
     }
-
-
 
     // fallback manual fields
-
     else {
-
-
-      if(body.requiredSkills){
-
-        jobData.requiredSkills =
-          body.requiredSkills;
-
+      if (body.requiredSkills) {
+        jobData.requiredSkills = body.requiredSkills;
       }
 
+      const experience = body.requiredExperience ?? body.experience;
 
-
-      const experience =
-        body.requiredExperience ??
-        body.experience;
-
-
-
-      if(experience !== undefined){
-
-        jobData.requiredExperience =
-          Number(experience);
-
+      if (experience !== undefined) {
+        jobData.requiredExperience = Number(experience);
       }
 
-
-
-      if(body.requiredEducation){
-
-        jobData.requiredEducation =
-          body.requiredEducation;
-
+      if (body.requiredEducation) {
+        jobData.requiredEducation = body.requiredEducation;
       }
-
     }
 
-
-
-    if(body.benefits !== undefined){
-
-      jobData.benefits =
-        body.benefits;
-
+    if (body.benefits !== undefined) {
+      jobData.benefits = body.benefits;
     }
 
+    const job = await Job.create(jobData);
 
-
-    const job =
-      await Job.create(jobData);
-
-
-
-    sendSuccess(
-      res,
-      201,
-      'Job created successfully',
-      {
-        job:
-        formatJobResponse(job,0),
-      }
-    );
-
+    sendSuccess(res, 201, 'Job created successfully', {
+      job: formatJobResponse(job, 0),
+    });
   }
 );
 
@@ -221,81 +122,79 @@ const formatJobResponse = (job: any, applicationsCount: number) => ({
 });
 
 // Get all jobs with pagination and filters - Figma: search, location, jobType, department, minSalary, maxSalary
-export const getJobs = asyncHandler(
-  async (req: AuthRequest, res: Response) => {
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 10;
-    const status = req.query.status as string;
-    const search = req.query.search as string;
-    const location = req.query.location as string;
-    const jobType = req.query.jobType as string;
-    const department = req.query.department as string;
-    const minSalary = parseFloat(req.query.minSalary as string);
-    const maxSalary = parseFloat(req.query.maxSalary as string);
+export const getJobs = asyncHandler(async (req: AuthRequest, res: Response) => {
+  const page = parseInt(req.query.page as string) || 1;
+  const limit = parseInt(req.query.limit as string) || 10;
+  const status = req.query.status as string;
+  const search = req.query.search as string;
+  const location = req.query.location as string;
+  const jobType = req.query.jobType as string;
+  const department = req.query.department as string;
+  const minSalary = parseFloat(req.query.minSalary as string);
+  const maxSalary = parseFloat(req.query.maxSalary as string);
 
-    const query: Record<string, unknown> = {};
-    const userId = req.user?.userId;
+  const query: Record<string, unknown> = {};
+  const userId = req.user?.userId;
 
-    if (userId) {
+  if (userId) {
     query.createdBy = userId;
   }
-    if (status) query.status = status;
-    if (location) query.location = new RegExp(location, 'i');
-    if (jobType) query.jobType = jobType;
-    if (department) query.department = new RegExp(department, 'i');
-    if (!isNaN(minSalary) && minSalary > 0) {
-      (query as any)['salaryRange.min'] = { $gte: minSalary };
-    }
-    if (!isNaN(maxSalary) && maxSalary > 0) {
-      (query as any)['salaryRange.max'] = { $lte: maxSalary };
-    }
-    if (search?.trim()) {
-      query.$or = [
-        { title: new RegExp(search.trim(), 'i') },
-        { description: new RegExp(search.trim(), 'i') },
-      ];
-    }
-
-    const skip = (page - 1) * limit;
-
-    const [jobs, total] = await Promise.all([
-      Job.find(query)
-        .populate('createdBy', 'firstName lastName email companyName')
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit)
-        .lean(),
-      Job.countDocuments(query),
-    ]);
-
-    // Get applicationsCount per job
-    const jobIds = jobs.map((j: any) => j._id);
-    const cvCounts = await CV.aggregate([
-      { $match: { jobId: { $in: jobIds } } },
-      { $group: { _id: '$jobId', count: { $sum: 1 } } },
-    ]);
-    const countMap = new Map(
-      cvCounts.map((c: any) => [c._id.toString(), c.count])
-    );
-
-    const formattedJobs = jobs.map((job: any) =>
-      formatJobResponse(
-        { ...job, createdBy: job.createdBy },
-        countMap.get(job._id.toString()) || 0
-      )
-    );
-
-    sendSuccess(res, 200, 'Jobs fetched successfully', {
-      jobs: formattedJobs,
-      pagination: {
-        page,
-        limit,
-        total,
-        pages: Math.ceil(total / limit),
-      },
-    });
+  if (status) query.status = status;
+  if (location) query.location = new RegExp(location, 'i');
+  if (jobType) query.jobType = jobType;
+  if (department) query.department = new RegExp(department, 'i');
+  if (!isNaN(minSalary) && minSalary > 0) {
+    (query as any)['salaryRange.min'] = { $gte: minSalary };
   }
-);
+  if (!isNaN(maxSalary) && maxSalary > 0) {
+    (query as any)['salaryRange.max'] = { $lte: maxSalary };
+  }
+  if (search?.trim()) {
+    query.$or = [
+      { title: new RegExp(search.trim(), 'i') },
+      { description: new RegExp(search.trim(), 'i') },
+    ];
+  }
+
+  const skip = (page - 1) * limit;
+
+  const [jobs, total] = await Promise.all([
+    Job.find(query)
+      .populate('createdBy', 'firstName lastName email companyName')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean(),
+    Job.countDocuments(query),
+  ]);
+
+  // Get applicationsCount per job
+  const jobIds = jobs.map((j: any) => j._id);
+  const cvCounts = await CV.aggregate([
+    { $match: { jobId: { $in: jobIds } } },
+    { $group: { _id: '$jobId', count: { $sum: 1 } } },
+  ]);
+  const countMap = new Map(
+    cvCounts.map((c: any) => [c._id.toString(), c.count])
+  );
+
+  const formattedJobs = jobs.map((job: any) =>
+    formatJobResponse(
+      { ...job, createdBy: job.createdBy },
+      countMap.get(job._id.toString()) || 0
+    )
+  );
+
+  sendSuccess(res, 200, 'Jobs fetched successfully', {
+    jobs: formattedJobs,
+    pagination: {
+      page,
+      limit,
+      total,
+      pages: Math.ceil(total / limit),
+    },
+  });
+});
 
 export const getMyJobs = asyncHandler(
   async (req: AuthRequest, res: Response) => {
@@ -385,16 +284,15 @@ export const updateJob = asyncHandler(
 
     // Check authorization - only creator can update
     if (job.createdBy.toString() !== userId) {
-      throw new AuthorizationError(
-        'You are not authorized to update this job'
-      );
+      throw new AuthorizationError('You are not authorized to update this job');
     }
 
     const body = req.body;
     const updateData: Record<string, any> = {};
     if (body.title !== undefined) updateData.title = body.title;
     if (body.jobTitle !== undefined) updateData.title = body.jobTitle;
-    if (body.description !== undefined) updateData.description = body.description;
+    if (body.description !== undefined)
+      updateData.description = body.description;
     if (body.jobDescription !== undefined)
       updateData.description = body.jobDescription;
     if (body.requirements !== undefined)
@@ -404,7 +302,8 @@ export const updateJob = asyncHandler(
     if (body.location !== undefined) updateData.location = body.location;
     if (body.jobType !== undefined) updateData.jobType = body.jobType;
     if (body.department !== undefined) updateData.department = body.department;
-    if (body.salaryRange !== undefined) updateData.salaryRange = body.salaryRange;
+    if (body.salaryRange !== undefined)
+      updateData.salaryRange = body.salaryRange;
     if (body.status !== undefined) updateData.status = body.status;
     if (body.requiredSkills !== undefined)
       updateData.requiredSkills = body.requiredSkills;
@@ -442,12 +341,9 @@ export const deleteJob = asyncHandler(
       throw new NotFoundError('Job not found');
     }
 
-
     // Check authorization - only creator can delete
     if (job.createdBy.toString() !== userId) {
-      throw new AuthorizationError(
-        'You are not authorized to delete this job'
-      );
+      throw new AuthorizationError('You are not authorized to delete this job');
     }
 
     await Job.findByIdAndDelete(id);
@@ -496,10 +392,10 @@ export const getJobCandidates = asyncHandler(
       throw new NotFoundError('Job not found');
     }
     if (job.createdBy.toString() !== req.user?.userId) {
-    throw new AuthorizationError(
-      'You are not authorized to view these candidates'
-    );
-  }
+      throw new AuthorizationError(
+        'You are not authorized to view these candidates'
+      );
+    }
 
     const query: any = { jobId: id };
     if (minScore > 0 || (!isNaN(maxScore) && maxScore > 0)) {
@@ -509,8 +405,16 @@ export const getJobCandidates = asyncHandler(
     }
     const cvStatus = figmaStatusToCv(statusFilter || '');
     if (cvStatus) query.status = cvStatus;
-    if (startDate) query.uploadedAt = { ...(query.uploadedAt || {}), $gte: new Date(startDate) };
-    if (endDate) query.uploadedAt = { ...(query.uploadedAt || {}), $lte: new Date(endDate) };
+    if (startDate)
+      query.uploadedAt = {
+        ...(query.uploadedAt || {}),
+        $gte: new Date(startDate),
+      };
+    if (endDate)
+      query.uploadedAt = {
+        ...(query.uploadedAt || {}),
+        $lte: new Date(endDate),
+      };
     if (search) {
       query.$or = [
         { 'parsedData.rawText': new RegExp(search, 'i') },

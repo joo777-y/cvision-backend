@@ -39,12 +39,12 @@ export const getDashboardStats = asyncHandler(
       jobId: { $in: jobIds },
     });
 
-   const threeDaysAgo = new Date();
-      threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+   const oneDayAgo = new Date();
+      oneDayAgo .setDate(oneDayAgo .getDate() - 3);
 
       const newApplications = await CV.countDocuments({
         jobId: { $in: jobIds },
-        uploadedAt: { $gte: threeDaysAgo },
+        uploadedAt: { $gte: oneDayAgo  },
       }); 
 
     const rejected = await CV.countDocuments({

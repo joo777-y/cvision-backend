@@ -2,7 +2,7 @@ import express, { Application } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
-// import { config } from './config/env';
+import { config } from './config/env';
 import { errorHandler, notFound } from './middlewares/errorHandler';
 
 import authRoutes from './routes/authRoutes';
@@ -20,12 +20,22 @@ app.set("trust proxy", 1);
 app.use(helmet());
 
 // CORS
+const defaultCorsOrigins = [
+  "http://localhost:5173",
+  "https://c-vision-one.vercel.app",
+];
+const envCorsOrigins =
+  config.cors.origin
+    ?.split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean) || [];
+const allowedOrigins = Array.from(
+  new Set([...defaultCorsOrigins, ...envCorsOrigins])
+);
+
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      "https://c-vision-one.vercel.app",
-    ],
+    origin: allowedOrigins,
     credentials: true,
   })
 );

@@ -1,7 +1,13 @@
+# Dependencies and build output
+node_modules/
+dist/
+
 # Docker
 Dockerfile
 .dockerignore
 docker-compose.yml
 
-# Production env file
+# Environment files
+.env
+.env.local
 .env.production

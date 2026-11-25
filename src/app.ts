@@ -2,8 +2,10 @@ import express, { Application } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
+import mongoose from 'mongoose';
 import { config } from './config/env';
 import { errorHandler, notFound } from './middlewares/errorHandler';
+import { sendError } from './utils/response';
 
 import authRoutes from './routes/authRoutes';
 import jobRoutes from './routes/jobRoutes';
@@ -92,6 +94,15 @@ app.use(express.urlencoded({ extended: true }));
 // Health check (no /api prefix)
 app.get('/health', (_req, res) => {
   res.status(200).json({ status: 'UP', message: 'Server is healthy' });
+});
+
+// Reject API requests cleanly while MongoDB is connecting or disconnected
+app.use('/api', (_req, res, next) => {
+  if (mongoose.connection.readyState !== 1) {
+    sendError(res, 503, 'Service temporarily unavailable: database not connected');
+    return;
+  }
+  next();
 });
 
 // API routes

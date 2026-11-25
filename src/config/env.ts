@@ -6,7 +6,7 @@ dotenv.config();
 export const config = {
   env: process.env.NODE_ENV || 'development',
   // Railway يحدد البورت تلقائياً عبر متغير PORT
-  port: parseInt(process.env.PORT || '5000', 10),
+  port: parseInt(process.env.PORT || '3000', 10),
   EMAIL_USER: process.env.EMAIL_USER,
   EMAIL_PASS: process.env.EMAIL_PASS,
   

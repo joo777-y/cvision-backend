@@ -17,18 +17,6 @@ const startServer = async () => {
     process.exit(1);
   });
 
-  const port = Number(process.env.PORT) || config.port;
-
-  // Bind HTTP immediately so platform health checks on $PORT do not time out while MongoDB connects.
-  const server = app.listen(port, '0.0.0.0', () => {
-    console.log(`Server running on http://0.0.0.0:${port}`);
-  });
-
-  server.on('error', (error) => {
-    console.error('Failed to start HTTP server:', error);
-    process.exit(1);
-  });
-
   try {
     await connectDatabase();
     initGridFS();
